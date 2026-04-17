@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+public/sw.js
+public/workbox-*.js
+.env.local
+.env*.local
+tsconfig.tsbuildinfo
+.convex/
+*.tsbuildinfo
+BlockSense_Blueprint_v2.docx
+BlockSense_Blueprint_v2.pdf
+scripts/

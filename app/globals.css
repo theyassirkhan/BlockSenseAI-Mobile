@@ -1,0 +1,180 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 97%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 161 80% 24%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 160 100% 95%;
+    --accent-foreground: 161 80% 24%;
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 90%;
+    --ring: 161 80% 24%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 17% 98%;
+    --card: 220 26% 14%;
+    --card-foreground: 210 17% 98%;
+    --popover: 220 26% 14%;
+    --popover-foreground: 210 17% 98%;
+    --primary: 161 60% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 210 17% 98%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 217 11% 65%;
+    --accent: 161 30% 18%;
+    --accent-foreground: 161 60% 60%;
+    --destructive: 0 55% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 22%;
+    --input: 220 20% 22%;
+    --ring: 161 60% 38%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans transition-colors duration-200;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer;
+  }
+  .sidebar-item-active {
+    @apply bg-primary text-primary-foreground;
+  }
+  .sidebar-item-inactive {
+    @apply text-muted-foreground hover:bg-accent hover:text-accent-foreground;
+  }
+}
+
+/* Replace hardcoded rgba borders with theme-aware borders */
+[style*="rgba(0,0,0,0.08)"],
+[style*="rgba(0,0,0,0.1)"],
+[style*="rgba(0,0,0,0.12)"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Skeleton shimmer for dark mode */
+.dark .animate-pulse {
+  @apply bg-muted;
+}
+
+/* Chart axis / grid lines dark mode */
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-legend-item-text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: hsl(var(--border)) !important;
+}
+
+/* Toast dark mode */
+.dark [data-sonner-toaster] {
+  --normal-bg: hsl(var(--card));
+  --normal-border: hsl(var(--border));
+  --normal-text: hsl(var(--foreground));
+}
+
+/* Prevent flash of wrong theme */
+html:not(.dark):not(.light) {
+  visibility: hidden;
+}
+
+/* ===== Mobile PWA Touch Optimizations ===== */
+html {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+* {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
+  font-size: 16px; /* prevents iOS auto-zoom on focus */
+}
+
+button,
+a,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Replace hover with active for touch */
+@media (hover: none) {
+  *:hover {
+    background-color: unset !important;
+    color: unset !important;
+  }
+}
+
+/* Support reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Full-screen modals on small screens */
+@media (max-width: 639px) {
+  [role="dialog"] {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+}
+
+/* Pull-to-refresh indicator spacing */
+.ptr-children {
+  min-height: 100%;
+}
