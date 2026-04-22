@@ -11,12 +11,6 @@ import {
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/water", label: "Water", icon: Droplets, color: "#185FA5" },
-  { href: "/dashboard/power", label: "Power", icon: Zap, color: "#854F0B" },
-  { href: "/dashboard/gas", label: "Gas", icon: Flame, color: "#0F6E56" },
-  { href: "/dashboard/sewage", label: "Sewage", icon: Wind, color: "#993C1D" },
-  { href: "/dashboard/waste", label: "Waste", icon: Trash2, color: "#993556" },
-  { href: "/dashboard/garbage", label: "Garbage", icon: Truck, color: "#3B6D11" },
   { href: "/dashboard/residents", label: "Residents", icon: Building2 },
   { href: "/dashboard/staff", label: "Staff", icon: Users2 },
   { href: "/dashboard/vendors", label: "Vendors", icon: Wrench },
@@ -25,6 +19,12 @@ const NAV = [
   { href: "/dashboard/tickets", label: "Tickets", icon: TicketCheck },
   { href: "/dashboard/broadcasts", label: "Broadcasts", icon: Megaphone },
   { href: "/dashboard/alerts", label: "Alerts", icon: BellRing },
+  { href: "/dashboard/water", label: "Water", icon: Droplets, color: "#185FA5" },
+  { href: "/dashboard/power", label: "Power", icon: Zap, color: "#854F0B" },
+  { href: "/dashboard/gas", label: "Gas", icon: Flame, color: "#0F6E56" },
+  { href: "/dashboard/sewage", label: "Sewage", icon: Wind, color: "#993C1D" },
+  { href: "/dashboard/waste", label: "Waste", icon: Trash2, color: "#993556" },
+  { href: "/dashboard/garbage", label: "Garbage", icon: Truck, color: "#3B6D11" },
   { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
