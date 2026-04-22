@@ -4,11 +4,13 @@ import { useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useState, useRef, useEffect } from "react";
 
-export function ResidentHeader() {
+interface ResidentHeaderProps { onMenuOpen?: () => void; }
+
+export function ResidentHeader({ onMenuOpen }: ResidentHeaderProps) {
   const { signOut } = useAuthActions();
   const router = useRouter();
   const profile = useQuery(api.users.getMyProfile);
@@ -29,8 +31,11 @@ export function ResidentHeader() {
   }, []);
 
   return (
-    <header className="h-14 flex items-center justify-between px-4 border-b bg-card shrink-0" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+    <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
       <div className="flex items-center gap-2 min-w-0">
+        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 transition-colors md:hidden shrink-0" aria-label="Open menu">
+          <Menu className="h-5 w-5 text-white/70" />
+        </button>
         <span className="text-sm font-semibold text-foreground truncate">{society?.name ?? "BlockSense"}</span>
         {profile?.flatNumber && (
           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
@@ -57,9 +62,9 @@ export function ResidentHeader() {
           <div
             role="menu"
             className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-            style={{ borderColor: "rgba(0,0,0,0.1)" }}
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
           >
-            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
               <p className="text-sm font-medium">{profile?.name}</p>
               <p className="text-xs text-muted-foreground capitalize">{profile?.role ?? "resident"}</p>
             </div>

@@ -87,7 +87,7 @@ export default function GarbagePage() {
         <Card>
           <CardHeader><CardTitle>Schedule collection</CardTitle></CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-3">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1 col-span-2 md:col-span-1">
                 <Label className="text-xs">Vendor</Label>
                 <Select onValueChange={v => form.setValue("vendorId", v)}>

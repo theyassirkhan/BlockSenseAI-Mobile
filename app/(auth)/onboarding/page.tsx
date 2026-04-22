@@ -278,7 +278,7 @@ function BlockBuilder({ blocks, onChange }: { blocks: BlockEntry[]; onChange: (b
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
+      <div className="flex flex-wrap gap-2 items-end">
         <div className="space-y-1">
           <Label className="text-xs">Name</Label>
           <Input value={name} onChange={e => setName(e.target.value)} placeholder="Block A" onKeyDown={e => e.key === "Enter" && add()} />

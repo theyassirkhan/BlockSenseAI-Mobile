@@ -74,7 +74,7 @@ export default function GasPage() {
         <Card>
           <CardHeader><CardTitle>Log gas reading</CardTitle></CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-3">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Meter reading (SCM)</Label>
                 <Input type="number" step="0.01" {...form.register("meterReading")} />

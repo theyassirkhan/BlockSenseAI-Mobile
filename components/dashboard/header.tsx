@@ -6,17 +6,17 @@ import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useActiveBlock } from "@/hooks/use-active-block";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { BellRing, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { BellRing, ChevronDown, LogOut, Settings, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
 interface HeaderProps {
   societyId?: Id<"societies">;
+  onMenuOpen?: () => void;
 }
 
-export function Header({ societyId }: HeaderProps) {
+export function Header({ societyId, onMenuOpen }: HeaderProps) {
   const { signOut } = useAuthActions();
   const router = useRouter();
   const profile = useQuery(api.users.getMyProfile);
@@ -47,9 +47,15 @@ export function Header({ societyId }: HeaderProps) {
   const criticalCount = alerts?.filter(a => a.severity === "critical").length ?? 0;
 
   return (
-    <header className="h-14 flex items-center justify-between px-4 border-b bg-card shrink-0" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
-      {/* Society name */}
+    <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
       <div className="flex items-center gap-2 min-w-0">
+        <button
+          onClick={onMenuOpen}
+          className="p-1.5 rounded-md hover:bg-white/10 transition-colors md:hidden shrink-0"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5 text-white/70" />
+        </button>
         <span className="text-sm font-semibold text-foreground truncate">{society?.name ?? "BlockSense"}</span>
         {society?.city && <span className="text-xs text-muted-foreground hidden sm:inline">{society.city}</span>}
       </div>
@@ -63,7 +69,7 @@ export function Header({ societyId }: HeaderProps) {
               aria-expanded={blockOpen}
               aria-haspopup="listbox"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
-              style={{ borderColor: "rgba(0,0,0,0.12)" }}
+              style={{ borderColor: "rgba(255,255,255,0.09)" }}
             >
               <span className="max-w-[120px] truncate">{activeBlock?.name ?? "Select block"}</span>
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", blockOpen && "rotate-180")} />
@@ -72,7 +78,7 @@ export function Header({ societyId }: HeaderProps) {
               <div
                 role="listbox"
                 className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-                style={{ borderColor: "rgba(0,0,0,0.1)" }}
+                style={{ borderColor: "rgba(255,255,255,0.08)" }}
               >
                 {blocks.map(b => (
                   <button
@@ -88,7 +94,7 @@ export function Header({ societyId }: HeaderProps) {
                     {b.name}
                   </button>
                 ))}
-                <div className="border-t my-1" style={{ borderColor: "rgba(0,0,0,0.08)" }} />
+                <div className="border-t my-1" style={{ borderColor: "rgba(255,255,255,0.07)" }} />
                 <button
                   onClick={() => { router.push("/block-select"); setBlockOpen(false); }}
                   className="w-full text-left px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors"
@@ -131,9 +137,9 @@ export function Header({ societyId }: HeaderProps) {
             <div
               role="menu"
               className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-              style={{ borderColor: "rgba(0,0,0,0.1)" }}
+              style={{ borderColor: "rgba(255,255,255,0.08)" }}
             >
-              <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+              <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                 <p className="text-sm font-medium">{profile?.name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
               </div>

@@ -188,7 +188,7 @@ export default function LoginPage() {
       </div>
 
       {/* Left panel */}
-      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 relative z-10">
         <Grid />
         <motion.div
           className="w-full max-w-sm space-y-7 relative"

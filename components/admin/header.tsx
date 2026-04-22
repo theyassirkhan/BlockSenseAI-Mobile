@@ -4,12 +4,14 @@ import { useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-import { LogOut, ChevronDown, Shield } from "lucide-react";
+import { LogOut, ChevronDown, Shield, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-export function AdminHeader() {
+interface AdminHeaderProps { onMenuOpen?: () => void; }
+
+export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
   const { signOut } = useAuthActions();
   const router = useRouter();
   const profile = useQuery(api.users.getMyProfile);
@@ -26,10 +28,13 @@ export function AdminHeader() {
 
   return (
     <header
-      className="h-14 flex items-center justify-between px-4 border-b bg-card shrink-0"
-      style={{ borderColor: "rgba(0,0,0,0.08)" }}
+      className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass"
+      style={{ borderColor: "rgba(255,255,255,0.07)" }}
     >
       <div className="flex items-center gap-2">
+        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 transition-colors md:hidden shrink-0" aria-label="Open menu">
+          <Menu className="h-5 w-5 text-white/70" />
+        </button>
         <Shield className="h-4 w-4 text-primary" />
         <span className="text-sm font-semibold text-foreground">Platform Admin Console</span>
       </div>
@@ -54,9 +59,9 @@ export function AdminHeader() {
           <div
             role="menu"
             className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-            style={{ borderColor: "rgba(0,0,0,0.1)" }}
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
           >
-            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
               <p className="text-sm font-medium">{profile?.name}</p>
               <p className="text-xs text-primary font-semibold">Platform Admin</p>
             </div>
