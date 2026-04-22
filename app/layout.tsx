@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0F6E56",
+  themeColor: "#A855F7",
   viewportFit: "cover",
 };
 
@@ -31,8 +31,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="dark"
+            enableSystem={false}
             disableTransitionOnChange={false}
             storageKey="blocksense-theme"
           >
