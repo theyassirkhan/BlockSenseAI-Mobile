@@ -87,7 +87,7 @@ export default function ServiceRequestsPage() {
           { label: "Resolved", count: (requests ?? []).filter(r => r.status === "resolved").length, color: "text-success" },
           { label: "Total", count: (requests ?? []).length, color: "text-foreground" },
         ].map(({ label, count, color }) => (
-          <div key={label} className="bg-card border rounded-lg p-4" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+          <div key={label} className="bg-card border rounded-lg p-4" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">{label}</p>
             <p className={`text-2xl font-bold mt-1 ${color}`}>{count}</p>
           </div>
@@ -99,7 +99,7 @@ export default function ServiceRequestsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Description</th>
                   <th className="text-left px-4 py-3 font-medium">Category</th>
                   <th className="text-left px-4 py-3 font-medium">Priority</th>
@@ -112,7 +112,7 @@ export default function ServiceRequestsPage() {
                 {filtered.map(r => {
                   const hrs = hoursOpen(r);
                   return (
-                    <tr key={r._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                    <tr key={r._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                       <td className="px-4 py-3 font-medium max-w-[200px] truncate">{r.description}</td>
                       <td className="px-4 py-3 text-muted-foreground capitalize">{r.category}</td>
                       <td className="px-4 py-3">
@@ -133,7 +133,7 @@ export default function ServiceRequestsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {r.status !== "closed" && r.status !== "resolved" && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => advance(r._id, r.status)}>
+                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => advance(r._id, r.status)}>
                             Advance →
                           </Button>
                         )}

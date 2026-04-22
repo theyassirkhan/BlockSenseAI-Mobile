@@ -70,7 +70,7 @@ export default function ResidentPaymentsPage() {
           <CardHeader><CardTitle className="text-sm text-warning">Pending payments</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {pending.map(p => (
-              <div key={p._id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+              <div key={p._id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                 <div>
                   <p className="text-sm font-medium">{p.description}</p>
                   <p className="text-xs text-muted-foreground">Due {formatDateTime(p.dueDate)}</p>
@@ -81,7 +81,7 @@ export default function ResidentPaymentsPage() {
                     {STATUS_LABEL[p.status] ?? p.status}
                   </Badge>
                   {p.status === "pending" && (
-                    <Button size="sm" className="h-7 text-xs" disabled={paying === p._id} onClick={() => handlePay(p._id, p)}>
+                    <Button size="sm" className="h-8 text-xs" disabled={paying === p._id} onClick={() => handlePay(p._id, p)}>
                       Pay
                     </Button>
                   )}
@@ -97,7 +97,7 @@ export default function ResidentPaymentsPage() {
           <CardHeader><CardTitle className="text-sm flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />Payment history</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {paid.slice(0, 10).map(p => (
-              <div key={p._id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+              <div key={p._id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                 <div>
                   <p className="text-sm font-medium">{p.description}</p>
                   <p className="text-xs text-muted-foreground">{p.paidAt ? `Paid ${formatDateTime(p.paidAt)}` : ""}</p>

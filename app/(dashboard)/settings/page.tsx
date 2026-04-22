@@ -156,7 +156,7 @@ export default function SettingsPage() {
             <CardHeader><CardTitle>All blocks ({blocks?.length ?? 0})</CardTitle></CardHeader>
             <CardContent>
               {blocks?.map(b => (
-                <div key={b._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+                <div key={b._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <span className="font-medium">{b.name}</span>
                   <Badge variant="outline" className="capitalize">{b.type}</Badge>
                 </div>
@@ -168,7 +168,7 @@ export default function SettingsPage() {
         {/* Vendors */}
         <TabsContent value="vendors" className="mt-4 space-y-4">
           <div className="flex justify-end">
-            <Button size="sm" variant="outline" onClick={() => setShowVendorForm(p => !p)}>
+            <Button type="button" size="sm" variant="outline" onClick={() => setShowVendorForm(p => !p)}>
               <Plus className="h-3.5 w-3.5 mr-1" />Add vendor
             </Button>
           </div>
@@ -201,7 +201,7 @@ export default function SettingsPage() {
             <CardHeader><CardTitle>Vendors ({vendors?.length ?? 0})</CardTitle></CardHeader>
             <CardContent>
               {vendors?.map(v => (
-                <div key={v._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+                <div key={v._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <div>
                     <p className="font-medium">{v.name} {v.isPreferred && "⭐"}</p>
                     <p className="text-xs text-muted-foreground">{v.phone}</p>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
             <CardHeader><CardTitle className="flex items-center gap-2"><Users2 className="h-4 w-4" />Members ({users?.length ?? 0})</CardTitle></CardHeader>
             <CardContent>
               {users?.map(u => (
-                <div key={u._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+                <div key={u._id} className="flex items-center justify-between py-2 border-b last:border-0 text-sm" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <div>
                     <p className="font-medium">{u.name}</p>
                     <p className="text-xs text-muted-foreground">{u.flatNumber ?? "—"}</p>

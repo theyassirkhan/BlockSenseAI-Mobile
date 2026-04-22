@@ -128,7 +128,7 @@ export default function VendorsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Vendor</th>
                   <th className="text-left px-4 py-3 font-medium">Type</th>
                   <th className="text-left px-4 py-3 font-medium">Phone</th>
@@ -140,7 +140,7 @@ export default function VendorsPage() {
               </thead>
               <tbody>
                 {(vendors ?? []).map(v => (
-                  <tr key={v._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={v._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium">{v.name}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-medium capitalize" style={{ color: TYPE_COLOR[v.type as VendorType] ?? "#6B7280" }}>
@@ -163,7 +163,7 @@ export default function VendorsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-xs"
+                        className="h-8 text-xs"
                         onClick={() => toggleActive({ vendorId: v._id, isActive: !(v.isActive ?? v.isPreferred) })}
                       >
                         {(v.isActive ?? v.isPreferred) ? "Deactivate" : "Activate"}

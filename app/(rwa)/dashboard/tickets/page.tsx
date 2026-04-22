@@ -123,7 +123,7 @@ export default function RwaTicketsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Subject</th>
                   <th className="text-left px-4 py-3 font-medium">Category</th>
                   <th className="text-left px-4 py-3 font-medium">Priority</th>
@@ -133,7 +133,7 @@ export default function RwaTicketsPage() {
               </thead>
               <tbody>
                 {(tickets ?? []).map(t => (
-                  <tr key={t._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={t._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium max-w-[240px] truncate">{t.subject}</td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{t.category.replace("_", " ")}</td>
                     <td className="px-4 py-3">

@@ -125,7 +125,7 @@ export default function RwaBroadcastsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Title</th>
                   <th className="text-left px-4 py-3 font-medium">Type</th>
                   <th className="text-left px-4 py-3 font-medium">Target</th>
@@ -135,7 +135,7 @@ export default function RwaBroadcastsPage() {
               </thead>
               <tbody>
                 {(broadcasts ?? []).map(b => (
-                  <tr key={b._id} className="border-b hover:bg-muted/30" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={b._id} className="border-b hover:bg-muted/30" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium">{b.title}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-medium" style={{ color: TYPE_COLOR[b.type] }}>{b.type}</span>

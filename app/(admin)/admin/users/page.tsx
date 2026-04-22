@@ -82,7 +82,7 @@ export default function AdminUsersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                  <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                     <th className="text-left px-4 py-3 font-medium">Name</th>
                     <th className="text-left px-4 py-3 font-medium">Email</th>
                     <th className="text-left px-4 py-3 font-medium">Phone</th>
@@ -94,7 +94,7 @@ export default function AdminUsersPage() {
                 </thead>
                 <tbody>
                   {filtered.map((u) => (
-                    <tr key={u._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                    <tr key={u._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                       <td className="px-4 py-3 font-medium">{u.name ?? <span className="text-muted-foreground italic">Unnamed</span>}</td>
                       <td className="px-4 py-3 text-muted-foreground">{u.email ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground">{u.phone ?? "—"}</td>

@@ -114,7 +114,7 @@ export default function AdminSocietiesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Society</th>
                   <th className="text-left px-4 py-3 font-medium">City</th>
                   <th className="text-left px-4 py-3 font-medium">Flats</th>
@@ -126,7 +126,7 @@ export default function AdminSocietiesPage() {
               </thead>
               <tbody>
                 {societies?.map((s) => (
-                  <tr key={s._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={s._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium">{s.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.city}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.totalFlats ?? "—"}</td>

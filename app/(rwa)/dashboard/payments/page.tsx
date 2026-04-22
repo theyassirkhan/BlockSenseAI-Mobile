@@ -163,7 +163,7 @@ export default function PaymentsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Description</th>
                   <th className="text-left px-4 py-3 font-medium">Amount</th>
                   <th className="text-left px-4 py-3 font-medium">Due date</th>
@@ -174,7 +174,7 @@ export default function PaymentsPage() {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={p._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium max-w-[200px] truncate">{p.description}</td>
                     <td className="px-4 py-3">₹{p.amount.toLocaleString("en-IN")}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{formatDateTime(p.dueDate)}</td>
@@ -188,7 +188,7 @@ export default function PaymentsPage() {
                     </td>
                     <td className="px-4 py-3">
                       {p.status === "pending_confirmation" && (
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleConfirm(p._id)}>
+                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleConfirm(p._id)}>
                           Confirm
                         </Button>
                       )}

@@ -266,7 +266,7 @@ export default function PowerPage() {
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={consumptionByDay}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip formatter={(v: number) => [`${v} kWh`, "Consumption"]} />

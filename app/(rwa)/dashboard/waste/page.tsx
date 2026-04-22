@@ -130,7 +130,7 @@ export default function WastePage() {
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />

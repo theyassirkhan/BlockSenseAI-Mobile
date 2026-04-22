@@ -30,7 +30,7 @@ export default function AdminUtilitiesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Society</th>
                   {Object.entries(UTIL_ICONS).map(([key, { icon: Icon, color }]) => (
                     <th key={key} className="text-center px-4 py-3 font-medium">
@@ -44,7 +44,7 @@ export default function AdminUtilitiesPage() {
               </thead>
               <tbody>
                 {societies?.map((s) => (
-                  <tr key={s._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <tr key={s._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                     <td className="px-4 py-3 font-medium">
                       <div>
                         <p>{s.name}</p>

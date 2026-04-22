@@ -87,7 +87,7 @@ export default function AdminTicketsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <tr className="border-b text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <th className="text-left px-4 py-3 font-medium">Subject</th>
                   <th className="text-left px-4 py-3 font-medium">Society</th>
                   <th className="text-left px-4 py-3 font-medium">Category</th>
@@ -105,7 +105,7 @@ export default function AdminTicketsPage() {
                     <tr
                       key={t._id}
                       className={`border-b hover:bg-muted/30 transition-colors ${slaBreached && t.status === "open" ? "bg-red-50/50" : ""}`}
-                      style={{ borderColor: "rgba(0,0,0,0.05)" }}
+                      style={{ borderColor: "rgba(255,255,255,0.05)" }}
                     >
                       <td className="px-4 py-3 font-medium max-w-[200px] truncate">{t.subject}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
@@ -130,7 +130,7 @@ export default function AdminTicketsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {t.status !== "closed" && t.status !== "resolved" && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => advance(t._id, t.status)}>
+                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => advance(t._id, t.status)}>
                             Advance →
                           </Button>
                         )}

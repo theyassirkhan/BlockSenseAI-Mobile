@@ -293,7 +293,7 @@ export default function DashboardPage() {
                     <p className="text-2xl font-bold">{waterPred.avgDailyConsumption} <span className="text-sm font-normal">KL</span></p>
                   </div>
                 </div>
-                <div className="rounded-lg border p-3 flex items-center justify-between" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                <div className="rounded-lg border p-3 flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                   <p className="text-xs text-muted-foreground">Recommended order</p>
                   <p className="text-xs font-semibold">{daysFromNow(waterPred.recommendedOrderDate)}</p>
                 </div>

@@ -32,7 +32,7 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
       style={{ borderColor: "rgba(255,255,255,0.07)" }}
     >
       <div className="flex items-center gap-2">
-        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 transition-colors md:hidden shrink-0" aria-label="Open menu">
+        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 active:bg-white/20 transition-colors md:hidden shrink-0" aria-label="Open menu">
           <Menu className="h-5 w-5 text-white/70" />
         </button>
         <Shield className="h-4 w-4 text-primary" />
@@ -45,7 +45,7 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
         <button
           onClick={() => setUserOpen((p) => !p)}
           aria-expanded={userOpen}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
+          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent active:bg-accent/70 transition-colors"
         >
           <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
             {profile?.name?.[0]?.toUpperCase() ?? "A"}
@@ -68,7 +68,7 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
             <button
               role="menuitem"
               onClick={async () => { await signOut(); router.push("/login"); }}
-              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors"
+              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent active:bg-accent/70 transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>

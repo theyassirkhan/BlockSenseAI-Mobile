@@ -284,7 +284,7 @@ export default function WaterPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={consumptionByDay}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={(v: number) => [`${v} KL`, "Consumption"]} />
@@ -363,14 +363,14 @@ export default function WaterPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-xs text-muted-foreground" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
+                  <tr className="border-b text-xs text-muted-foreground" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                     <th className="text-left pb-2 font-medium">Date</th>
                     <th className="text-left pb-2 font-medium">Qty (KL)</th>
                     <th className="text-left pb-2 font-medium">Status</th>
                     <th className="text-left pb-2 font-medium">Cost</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y" style={{ borderColor: "rgba(0,0,0,0.04)" }}>
+                <tbody className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                   {orders.map(order => (
                     <tr key={order._id}>
                       <td className="py-2 text-muted-foreground">{formatDate(order.createdAt)}</td>

@@ -68,7 +68,7 @@ export default function BlockSelectPage() {
                 key={block._id}
                 onClick={() => selectBlock(block._id)}
                 className="group text-left bg-card rounded-lg border p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                style={{ borderColor: "rgba(0,0,0,0.08)" }}
+                style={{ borderColor: "rgba(255,255,255,0.07)" }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${BLOCK_TYPE_COLORS[block.type] ?? "bg-muted text-muted-foreground"}`}>

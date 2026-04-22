@@ -33,7 +33,7 @@ export function ResidentHeader({ onMenuOpen }: ResidentHeaderProps) {
   return (
     <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
       <div className="flex items-center gap-2 min-w-0">
-        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 transition-colors md:hidden shrink-0" aria-label="Open menu">
+        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 active:bg-white/20 transition-colors md:hidden shrink-0" aria-label="Open menu">
           <Menu className="h-5 w-5 text-white/70" />
         </button>
         <span className="text-sm font-semibold text-foreground truncate">{society?.name ?? "BlockSense"}</span>
@@ -51,7 +51,7 @@ export function ResidentHeader({ onMenuOpen }: ResidentHeaderProps) {
           onClick={() => setUserOpen(p => !p)}
           aria-expanded={userOpen}
           aria-haspopup="menu"
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
+          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent active:bg-accent/70 transition-colors"
         >
           <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
             {profile?.name?.[0]?.toUpperCase() ?? "?"}
@@ -71,14 +71,14 @@ export function ResidentHeader({ onMenuOpen }: ResidentHeaderProps) {
             <button
               role="menuitem"
               onClick={() => { router.push("/resident/profile"); setUserOpen(false); }}
-              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-accent active:bg-accent/70 transition-colors"
             >
               <Settings className="h-3.5 w-3.5" />Profile
             </button>
             <button
               role="menuitem"
               onClick={async () => { await signOut(); router.push("/login"); }}
-              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors"
+              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent active:bg-accent/70 transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" />Sign out
             </button>
