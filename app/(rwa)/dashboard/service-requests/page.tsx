@@ -36,7 +36,7 @@ export default function ServiceRequestsPage() {
     return true;
   });
 
-  const categories = Array.from(new Set((requests ?? []).map(r => r.category)));
+  const categories = Array.from(new Set((requests ?? []).map(r => r.category))) as string[];
 
   const now = Date.now();
   const hoursOpen = (r: { createdAt: number }) => Math.floor((now - r.createdAt) / 3600000);
