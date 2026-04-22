@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "convex:dev": "convex dev"
+    "sync:types": "npx convex dev --once --no-push"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",

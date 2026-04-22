@@ -36,6 +36,7 @@ import type * as vendors from "../vendors.js";
 import type * as visitors from "../visitors.js";
 import type * as waste from "../waste.js";
 import type * as water from "../water.js";
+import type * as whatsappOtp from "../whatsappOtp.js";
 
 import type {
   ApiFromModules,
@@ -72,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   visitors: typeof visitors;
   waste: typeof waste;
   water: typeof water;
+  whatsappOtp: typeof whatsappOtp;
 }>;
 
 /**

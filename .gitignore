@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 BlockSense_Blueprint_v2.docx
 BlockSense_Blueprint_v2.pdf
 scripts/
+.vercel
