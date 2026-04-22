@@ -281,7 +281,7 @@ export default function DashboardPage() {
           <CardContent>
             {waterPred ? (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <div className="rounded-lg bg-muted p-3">
                     <p className="text-xs text-muted-foreground mb-0.5">Days until critical</p>
                     <p className="text-2xl font-bold" style={{ color: waterPred.daysUntilCritical < 3 ? "#A32D2D" : waterPred.daysUntilCritical < 7 ? "#BA7517" : "#3B6D11" }}>
@@ -348,7 +348,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm">Health score breakdown</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: "Water level", value: healthScore.breakdown.water, max: 40 },
                 { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30 },

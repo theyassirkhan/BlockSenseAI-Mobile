@@ -50,18 +50,18 @@ export default function ResidentsPage() {
           <Building2 className="h-5 w-5" />
           Residents
         </h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[140px]">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search name / flat…"
-              className="pl-8 h-9 w-48"
+              className="pl-8 h-9 w-full"
             />
           </div>
           <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger className="w-32 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28 sm:w-32 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All roles</SelectItem>
               <SelectItem value="resident">Resident</SelectItem>
@@ -71,7 +71,7 @@ export default function ResidentsPage() {
             </SelectContent>
           </Select>
           <Select value={filterBlock} onValueChange={setFilterBlock}>
-            <SelectTrigger className="w-32 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28 sm:w-32 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All blocks</SelectItem>
               {blocks?.map(b => <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>)}

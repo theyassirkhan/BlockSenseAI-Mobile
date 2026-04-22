@@ -182,7 +182,7 @@ export default function OnboardingPage() {
                 <Label>Address</Label>
                 <Input placeholder="Street address" {...societyForm.register("address")} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>City *</Label>
                   <Input {...societyForm.register("city")} />
@@ -335,7 +335,7 @@ function TankBuilder({ blocks, tanks, onChange }: { blocks: BlockEntry[]; tanks:
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="space-y-1">
           <Label className="text-xs">Block</Label>
           <Select value={blockId} onValueChange={setBlockId}>
@@ -397,7 +397,7 @@ function DGBuilder({ blocks, dgUnits, onChange }: { blocks: BlockEntry[]; dgUnit
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="space-y-1 col-span-2">
           <Label className="text-xs">Block</Label>
           <Select value={blockId} onValueChange={setBlockId}>
@@ -453,7 +453,7 @@ function VendorBuilder({ vendors, onChange }: { vendors: VendorEntry[]; onChange
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="space-y-1"><Label className="text-xs">Name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Ravi Water Tankers" /></div>
         <div className="space-y-1">
           <Label className="text-xs">Type</Label>

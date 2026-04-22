@@ -80,13 +80,13 @@ export default function PaymentsPage() {
           <CreditCard className="h-5 w-5" />
           Payments
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => setShowChargeForm(true)}>
             <Settings2 className="mr-1.5 h-3.5 w-3.5" />
             Set charges
           </Button>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-32 sm:w-36 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All status</SelectItem>
               <SelectItem value="confirmed">Paid</SelectItem>
@@ -120,7 +120,7 @@ export default function PaymentsPage() {
         <Card>
           <CardHeader><CardTitle className="text-sm">Set Maintenance Charge</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label>Flat type</Label>
                 <Input value={chargeForm.flatType} onChange={e => setChargeForm({ ...chargeForm, flatType: e.target.value })} placeholder="standard / premium / studio" />

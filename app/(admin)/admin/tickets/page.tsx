@@ -58,9 +58,9 @@ export default function AdminTicketsPage() {
           <TicketCheck className="h-5 w-5" />
           Support Tickets
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-32 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28 sm:w-32 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All status</SelectItem>
               <SelectItem value="open">Open</SelectItem>
@@ -70,7 +70,7 @@ export default function AdminTicketsPage() {
             </SelectContent>
           </Select>
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="w-32 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28 sm:w-32 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All priority</SelectItem>
               <SelectItem value="urgent">Urgent</SelectItem>

@@ -286,7 +286,7 @@ export default function LoginPage() {
 
                 <TiltCard>
                   <form onSubmit={onOtpSubmit} className="space-y-5 p-5 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", backdropFilter: "blur(16px)" }}>
-                    <div className="flex gap-2.5" onPaste={handleOtpPaste}>
+                    <div className="flex gap-1.5 sm:gap-2.5" onPaste={handleOtpPaste}>
                       {otp.map((digit, i) => (
                         <motion.input
                           key={i}
@@ -297,7 +297,7 @@ export default function LoginPage() {
                           value={digit}
                           onChange={e => handleOtpChange(i, e.target.value)}
                           onKeyDown={e => handleOtpKeyDown(i, e)}
-                          className="flex-1 h-14 text-center text-xl font-bold text-white rounded-xl outline-none transition-all duration-150"
+                          className="flex-1 min-w-0 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold text-white rounded-xl outline-none transition-all duration-150"
                           style={{
                             background: digit ? "rgba(168,85,247,0.18)" : "rgba(255,255,255,0.04)",
                             border: digit ? "2px solid #A855F7" : "1px solid rgba(255,255,255,0.1)",
