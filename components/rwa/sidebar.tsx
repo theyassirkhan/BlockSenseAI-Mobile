@@ -43,7 +43,7 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
     <>
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          className="fixed inset-0 z-30 bg-black/60 md:hidden"
           onClick={onMobileClose}
           aria-hidden="true"
         />
@@ -52,7 +52,7 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
       <aside
         className={cn(
           "h-screen flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
-          "fixed inset-y-0 left-0 z-50 w-64",
+          "fixed inset-y-0 left-0 z-40 w-64",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:translate-x-0",
           collapsed ? "md:w-14" : "md:w-52"

@@ -47,7 +47,7 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
   const criticalCount = alerts?.filter(a => a.severity === "critical").length ?? 0;
 
   return (
-    <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+    <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass relative z-10" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
       <div className="flex items-center gap-2 min-w-0">
         <button
           onClick={onMenuOpen}
@@ -77,8 +77,8 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
             {blockOpen && (
               <div
                 role="listbox"
-                className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-                style={{ borderColor: "rgba(255,255,255,0.08)" }}
+                className="absolute right-0 top-full mt-1 rounded-lg border shadow-2xl py-1 z-[9999] min-w-[160px]"
+                style={{ background: "hsl(240,8%,10%)", borderColor: "rgba(255,255,255,0.08)" }}
               >
                 {blocks.map(b => (
                   <button
@@ -136,8 +136,8 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
           {userOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
-              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+              className="absolute right-0 top-full mt-1 rounded-lg border shadow-2xl py-1 z-[9999] min-w-[160px]"
+              style={{ background: "hsl(240,8%,10%)", borderColor: "rgba(255,255,255,0.08)" }}
             >
               <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
                 <p className="text-sm font-medium">{profile?.name}</p>
