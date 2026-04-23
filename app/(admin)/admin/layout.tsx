@@ -9,20 +9,25 @@ import { AdminHeader } from "@/components/admin/header";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const profile = useQuery(api.users.getMyProfile);
   const router = useRouter();
 
-  // Role guard — redirect non-admins away
-  if (profile === null) {
-    router.replace("/login");
+  // Only redirect once profile is confirmed loaded and has a non-admin role
+  if (profile !== undefined && profile !== null &&
+      profile.role !== "admin" && profile.role !== "platform_admin") {
+    router.replace("/dashboard");
     return null;
   }
 
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed((p) => !p)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+      <AdminSidebar
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((p) => !p)}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <AdminHeader onMenuOpen={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-5">{children}</main>
