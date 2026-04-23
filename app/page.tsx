@@ -2,19 +2,36 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { Suspense } from "react";
 
-export default function RootPage() {
+function RootRedirect() {
   const profile = useQuery(api.users.getMyProfile);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const setup = searchParams.get("setup");
 
   useEffect(() => {
     if (profile === undefined) return;
+
+    // Demo login passes ?setup=role — forward to the right dashboard with the param
+    if (setup) {
+      if (setup === "admin") {
+        router.replace(`/admin?setup=admin`);
+      } else if (setup === "resident") {
+        router.replace(`/resident?setup=resident`);
+      } else {
+        router.replace(`/dashboard?setup=${setup}`);
+      }
+      return;
+    }
+
     if (profile === null) {
       router.replace("/login");
       return;
     }
+
     if (profile.role === "platform_admin" || profile.role === "admin") {
       router.replace("/admin");
     } else if (profile.role === "resident") {
@@ -22,7 +39,15 @@ export default function RootPage() {
     } else {
       router.replace("/dashboard");
     }
-  }, [profile]);
+  }, [profile, setup]);
 
   return null;
+}
+
+export default function RootPage() {
+  return (
+    <Suspense>
+      <RootRedirect />
+    </Suspense>
+  );
 }
