@@ -3,8 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { Suspense } from "react";
+import { useEffect, Suspense } from "react";
 
 function RootRedirect() {
   const profile = useQuery(api.users.getMyProfile);
@@ -13,9 +12,7 @@ function RootRedirect() {
   const setup = searchParams.get("setup");
 
   useEffect(() => {
-    if (profile === undefined) return;
-
-    // Demo login passes ?setup=role — forward to the right dashboard with the param
+    // Demo login: forward immediately with the setup param — don't wait for profile
     if (setup) {
       if (setup === "admin") {
         router.replace(`/admin?setup=admin`);
@@ -27,11 +24,12 @@ function RootRedirect() {
       return;
     }
 
+    // Normal login: wait for profile to load then route by role
+    if (profile === undefined) return;
     if (profile === null) {
       router.replace("/login");
       return;
     }
-
     if (profile.role === "platform_admin" || profile.role === "admin") {
       router.replace("/admin");
     } else if (profile.role === "resident") {

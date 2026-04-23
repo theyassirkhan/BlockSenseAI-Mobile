@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Users, AlertTriangle, CheckCircle2, Activity, TrendingUp } from "lucide-react";
+import { Building2, AlertTriangle, Activity, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { formatDateTime } from "@/lib/utils";
 
@@ -16,6 +18,18 @@ const PLAN_COLOR: Record<string, string> = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const setupDemoUser = useMutation(api.demo.setupDemoUser);
+  const setupDone = useRef(false);
+
+  useEffect(() => {
+    const setup = searchParams.get("setup");
+    if (!setup || setupDone.current) return;
+    setupDone.current = true;
+    setupDemoUser({ role: "admin" }).then(() => router.replace("/admin")).catch(console.error);
+  }, [searchParams]);
+
   const societies = useQuery(api.societies_internal.listAll, {});
   const allTickets = useQuery(api.adminTickets.getAll, {});
 
