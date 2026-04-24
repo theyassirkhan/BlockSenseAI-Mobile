@@ -3,9 +3,9 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import QRCode from "qrcode";
-import { Shield, Clock, MapPin, User, CheckCircle2, XCircle } from "lucide-react";
+import { Shield, Clock, MapPin, CheckCircle2, XCircle } from "lucide-react";
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleString("en-IN", {
@@ -17,16 +17,16 @@ function formatTime(ts: number) {
 function GatepassInner() {
   const { passCode } = useParams<{ passCode: string }>();
   const visitor = useQuery(api.visitors.getByPassCode, passCode ? { passCode } : "skip");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   useEffect(() => {
-    if (!canvasRef.current || !passCode) return;
-    QRCode.toCanvas(canvasRef.current, passCode, {
+    if (!passCode) return;
+    QRCode.toDataURL(passCode, {
       width: 220,
       margin: 2,
       color: { dark: "#1a1040", light: "#ffffff" },
       errorCorrectionLevel: "H",
-    });
+    }).then(setQrDataUrl).catch(() => {});
   }, [passCode]);
 
   if (visitor === undefined) {
@@ -138,7 +138,10 @@ function GatepassInner() {
             className="rounded-2xl p-3"
             style={{ background: "#ffffff", border: "3px solid rgba(168,85,247,0.4)", boxShadow: "0 0 30px rgba(168,85,247,0.2)" }}
           >
-            <canvas ref={canvasRef} style={{ display: "block", borderRadius: "8px" }} />
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="Gate pass QR code" width={220} height={220} style={{ display: "block", borderRadius: "8px" }} />
+              : <div style={{ width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="w-8 h-8 rounded-full border-2 border-purple-400 border-t-transparent animate-spin" /></div>
+            }
           </div>
 
           {/* Pass code */}
