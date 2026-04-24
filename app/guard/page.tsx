@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Suspense } from "react";
 
+const GUARD_SOCIETY_KEY = "guard_societyId";
+
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }
@@ -37,6 +39,7 @@ function GuardPageInner() {
 
   const societyId = profile?.societyId as any;
 
+  // Show spinner while demo is being set up or profile is still loading
   if (settingUp || profile === undefined) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center gap-3 text-white">
@@ -46,6 +49,7 @@ function GuardPageInner() {
     );
   }
 
+  // Not authenticated or no society assigned
   if (!societyId) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
@@ -226,25 +230,99 @@ function WalkInForm({ societyId, onDone }: { societyId: any; onDone: () => void 
   );
 }
 
+function QrScanner({ onScan }: { onScan: (code: string) => void }) {
+  const scannerRef = useRef<any>(null);
+  const divId = "qr-scanner-region";
+
+  useEffect(() => {
+    let html5QrCode: any;
+    import("html5-qrcode").then(({ Html5Qrcode }) => {
+      html5QrCode = new Html5Qrcode(divId);
+      scannerRef.current = html5QrCode;
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText: string) => {
+          // Pass code is 6 digits; gatepass URL contains it at the end
+          const match = decodedText.match(/(\d{6})$/);
+          const code = match ? match[1] : decodedText.trim();
+          onScan(code);
+          html5QrCode.stop().catch(() => {});
+        },
+        () => {}
+      ).catch(() => {});
+    });
+    return () => {
+      scannerRef.current?.stop().catch(() => {});
+    };
+  }, []);
+
+  return (
+    <div className="rounded-xl overflow-hidden bg-black" style={{ aspectRatio: "1" }}>
+      <div id={divId} className="w-full h-full" />
+    </div>
+  );
+}
+
 function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) {
   const [code, setCode] = useState("");
+  const [scanning, setScanning] = useState(false);
   const lookup = useQuery(api.visitors.lookupByPassCode, code.length === 6 ? { societyId, passCode: code } : "skip");
+
+  function handleScan(scanned: string) {
+    setScanning(false);
+    setCode(scanned.slice(0, 6));
+  }
 
   return (
     <div className="space-y-4 max-w-md">
       <h2 className="font-semibold flex items-center gap-2 text-sm">
         <Search className="h-4 w-4 text-blue-400" /> Scan / Enter Pass Code
       </h2>
-      <Input
-        type="number"
-        inputMode="numeric"
-        placeholder="6-digit pass code"
-        value={code}
-        onChange={e => setCode(e.target.value.slice(0, 6))}
-        className="bg-gray-800 border-gray-700 text-white text-2xl tracking-widest text-center placeholder:text-gray-600"
-      />
 
-      {code.length === 6 && (
+      {/* Camera scan button */}
+      {!scanning && (
+        <button
+          onClick={() => { setCode(""); setScanning(true); }}
+          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-medium transition-colors"
+        >
+          <Camera className="h-4 w-4" /> Scan QR Code with Camera
+        </button>
+      )}
+
+      {/* Live camera scanner */}
+      {scanning && (
+        <div className="space-y-2">
+          <QrScanner onScan={handleScan} />
+          <button
+            onClick={() => setScanning(false)}
+            className="w-full text-xs text-gray-400 hover:text-white py-2"
+          >
+            Cancel scan
+          </button>
+        </div>
+      )}
+
+      {/* Manual entry */}
+      {!scanning && (
+        <>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex-1 h-px bg-gray-800" />
+            or enter manually
+            <div className="flex-1 h-px bg-gray-800" />
+          </div>
+          <Input
+            type="number"
+            inputMode="numeric"
+            placeholder="6-digit pass code"
+            value={code}
+            onChange={e => setCode(e.target.value.slice(0, 6))}
+            className="bg-gray-800 border-gray-700 text-white text-2xl tracking-widest text-center placeholder:text-gray-600"
+          />
+        </>
+      )}
+
+      {code.length === 6 && !scanning && (
         <div className="bg-gray-900 rounded-xl p-4">
           {lookup === undefined && <p className="text-sm text-gray-400">Looking up…</p>}
           {lookup === null && <p className="text-sm text-red-400">No visitor found for this code.</p>}

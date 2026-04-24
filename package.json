@@ -36,6 +36,7 @@
     "convex": "^1.17.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.38.0",
+    "html5-qrcode": "^2.3.8",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.487.0",
