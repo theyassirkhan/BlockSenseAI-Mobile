@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users2, Plus, Loader2, Phone, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
-import { format, startOfWeek, addDays, addWeeks } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 
 const staffSchema = z.object({
   name: z.string().min(1),
@@ -161,7 +161,13 @@ export default function StaffPage() {
     if (shiftsByDay[key]) shiftsByDay[key].push(s);
   });
 
-
+  const STATUS_BADGE: Record<string, string> = {
+    scheduled: "bg-blue-500/20 text-blue-300",
+    present: "bg-green-500/20 text-green-300",
+    absent: "bg-red-500/20 text-red-300",
+    half_day: "bg-yellow-500/20 text-yellow-300",
+    leave: "bg-gray-500/20 text-gray-300",
+  };
 
   return (
     <div className="space-y-5">
@@ -350,7 +356,7 @@ export default function StaffPage() {
                     const color = SHIFT_COLORS[s.shiftType] ?? "#A855F7";
                     return (
                       <div key={s._id} className="rounded-lg p-1.5 space-y-1" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-                        <p className="text-[10px] font-medium leading-tight truncate" style={{ color }}>{(member as any)?.name ?? "—"}</p>
+                        <p className="text-[10px] font-medium leading-tight truncate" style={{ color }}>{member?.name ?? "—"}</p>
                         <p className="text-[9px] text-muted-foreground">{s.startTime}–{s.endTime}</p>
                         <Select
                           value={s.status}

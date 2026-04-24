@@ -1,15 +1,14 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+import { CreditCard, CheckCircle2, ExternalLink } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
-import { Id } from "@/convex/_generated/dataModel";
+import { UpiQrButton } from "@/components/ui/upi-qr";
 
 const STATUS_COLOR: Record<string, "default" | "warning" | "critical" | "secondary"> = {
   confirmed: "default",
@@ -25,29 +24,22 @@ const STATUS_LABEL: Record<string, string> = {
   pending_confirmation: "Awaiting confirmation",
 };
 
+const WA_NUMBER = "919739121146";
+
 export default function ResidentPaymentsPage() {
   const profile = useQuery(api.users.getMyProfile);
   const societyId = profile?.societyId;
   const dues = useQuery(api.payments.getMyDues, societyId ? { societyId } : "skip");
-  const recordPayment = useMutation(api.payments.recordPayment);
-  const [paying, setPaying] = useState<string | null>(null);
+  const society = useQuery(api.societies.get, societyId ? { societyId } : "skip");
 
   const pending = (dues ?? []).filter(d => d.status === "pending" || d.status === "overdue");
   const paid = (dues ?? []).filter(d => d.status === "confirmed");
-
-  async function handlePay(paymentId: Id<"payments">, payment: typeof dues extends (infer T)[] | undefined ? T : never) {
-    setPaying(paymentId);
-    try {
-      // Mark as pending_confirmation — RWA will confirm
-      toast.success("Payment submitted. RWA will confirm shortly.");
-    } catch (e: any) {
-      toast.error(e.message);
-    } finally {
-      setPaying(null);
-    }
-  }
-
   const totalDue = pending.reduce((s, p) => s + p.amount, 0);
+
+  function buildWaMessage(description: string, amount: number) {
+    const msg = `Hi, I am ${profile?.name ?? "resident"} from Flat ${profile?.flatNumber ?? ""}. I would like to pay ₹${amount.toLocaleString("en-IN")} for ${description}. Please confirm once received.`;
+    return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+  }
 
   return (
     <div className="space-y-5">
@@ -57,35 +49,50 @@ export default function ResidentPaymentsPage() {
       </h1>
 
       {totalDue > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-amber-900">₹{totalDue.toLocaleString("en-IN")} due</p>
-            <p className="text-xs text-amber-700 mt-0.5">{pending.length} payment{pending.length > 1 ? "s" : ""} pending</p>
-          </div>
+        <div className="bg-amber-950/30 border border-amber-800/40 rounded-lg p-4">
+          <p className="font-semibold text-amber-300">₹{totalDue.toLocaleString("en-IN")} due</p>
+          <p className="text-xs text-amber-400/80 mt-0.5">{pending.length} payment{pending.length > 1 ? "s" : ""} pending</p>
         </div>
       )}
 
       {pending.length > 0 && (
         <Card>
           <CardHeader><CardTitle className="text-sm text-warning">Pending payments</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {pending.map(p => (
-              <div key={p._id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-                <div>
-                  <p className="text-sm font-medium">{p.description}</p>
-                  <p className="text-xs text-muted-foreground">Due {formatDateTime(p.dueDate)}</p>
+              <div key={p._id} className="border-b pb-4 last:border-0 last:pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-sm font-medium">{p.description}</p>
+                    <p className="text-xs text-muted-foreground">Due {formatDateTime(p.dueDate)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">₹{p.amount.toLocaleString("en-IN")}</span>
+                    <Badge variant={STATUS_COLOR[p.status] ?? "secondary"} className="text-[10px]">
+                      {STATUS_LABEL[p.status] ?? p.status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold">₹{p.amount.toLocaleString("en-IN")}</span>
-                  <Badge variant={STATUS_COLOR[p.status] ?? "secondary"} className="text-[10px]">
-                    {STATUS_LABEL[p.status] ?? p.status}
-                  </Badge>
-                  {p.status === "pending" && (
-                    <Button size="sm" className="h-8 text-xs" disabled={paying === p._id} onClick={() => handlePay(p._id, p)}>
-                      Pay
-                    </Button>
-                  )}
-                </div>
+                {/* Payment actions */}
+                {(p.status === "pending" || p.status === "overdue") && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <UpiQrButton
+                      upiId={society?.upiId}
+                      payeeName={society?.name ?? "Society"}
+                      amount={p.amount}
+                      description={p.description}
+                    />
+                    <a
+                      href={buildWaMessage(p.description, p.amount)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 border border-green-500/30 bg-green-950/20 rounded-lg px-2.5 py-1.5"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Notify via WhatsApp
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </CardContent>

@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Users, Home, Zap, BarChart3, Shield, ShieldAlert } from "lucide-react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 
 const DEMO_ROLES = [
-  { role: "admin" as const,    label: "Admin",          desc: "Full platform access", icon: ShieldCheck, color: "#A855F7", glow: "rgba(168,85,247,0.25)" },
-  { role: "rwa" as const,      label: "RWA Manager",    desc: "Manage & approve",     icon: Users,       color: "#38BDF8", glow: "rgba(56,189,248,0.25)" },
-  { role: "resident" as const, label: "Resident",       desc: "View & report",        icon: Home,        color: "#34D399", glow: "rgba(52,211,153,0.25)" },
-  { role: "guard" as const,    label: "Security Guard", desc: "Gate & visitor log",   icon: ShieldAlert, color: "#F97316", glow: "rgba(249,115,22,0.25)" },
+  { role: "admin" as const,    label: "Admin",          desc: "Full platform access", icon: ShieldCheck,  color: "#A855F7", glow: "rgba(168,85,247,0.25)" },
+  { role: "rwa" as const,      label: "RWA Manager",    desc: "Manage & approve",     icon: Users,        color: "#38BDF8", glow: "rgba(56,189,248,0.25)" },
+  { role: "resident" as const, label: "Resident",       desc: "View & report",        icon: Home,         color: "#34D399", glow: "rgba(52,211,153,0.25)" },
+  { role: "guard" as const,    label: "Security Guard", desc: "Gate & visitor log",   icon: ShieldAlert,  color: "#F97316", glow: "rgba(249,115,22,0.25)" },
 ];
 
 const FEATURES = [
@@ -18,17 +19,7 @@ const FEATURES = [
   { icon: Shield, label: "End-to-end alerts", color: "#34D399" },
 ];
 
-async function callAuth(args: Record<string, unknown>) {
-  const res = await fetch("/api/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "auth:signIn", args }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-  return data;
-}
-
+/* Floating ambient orb */
 function Orb({ style, animateVals }: { style: React.CSSProperties; animateVals: Record<string, number[]> }) {
   return (
     <motion.div
@@ -40,13 +31,15 @@ function Orb({ style, animateVals }: { style: React.CSSProperties; animateVals: 
   );
 }
 
+/* Perspective grid */
 function Grid() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ perspective: "600px" }}>
       <motion.div
         className="absolute inset-0"
         style={{
-          backgroundImage: "linear-gradient(rgba(168,85,247,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.08) 1px, transparent 1px)",
+          backgroundImage:
+            "linear-gradient(rgba(168,85,247,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.08) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
           transformOrigin: "50% 0%",
           rotateX: "55deg",
@@ -61,6 +54,7 @@ function Grid() {
   );
 }
 
+/* 3D tilt card */
 function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -86,6 +80,7 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
 }
 
 export default function LoginPage() {
+  const { signIn, signOut } = useAuthActions();
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [emailInput, setEmailInput] = useState("");
@@ -94,24 +89,18 @@ export default function LoginPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => {
-    callAuth({ provider: "signOut" }).catch(() => {});
-  }, []);
+  useEffect(() => { signOut().catch(() => {}); }, []);
 
   async function onEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!emailInput.trim()) return;
     setLoading(true);
     try {
-      const data = await callAuth({ provider: "resend-otp", params: { email: emailInput.toLowerCase().trim() } });
-      if (data.started) {
-        setEmail(emailInput.toLowerCase().trim());
-        setStep("otp");
-        toast.success("Code sent — check your inbox");
-        setTimeout(() => inputRefs.current[0]?.focus(), 100);
-      } else {
-        throw new Error("Unexpected response");
-      }
+      await signIn("resend-otp", { email: emailInput.toLowerCase().trim() });
+      setEmail(emailInput.toLowerCase().trim());
+      setStep("otp");
+      toast.success("Code sent — check your inbox");
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to send code");
     } finally {
@@ -125,9 +114,9 @@ export default function LoginPage() {
     if (code.length < 6) return;
     setLoading(true);
     try {
-      const data = await callAuth({ provider: "resend-otp", params: { email, code } });
-      if (data.tokens) {
-        window.location.href = "/dashboard";
+      const result = await signIn("resend-otp", { email, code });
+      if (result.signingIn) {
+        window.location.href = "/";
       } else {
         throw new Error("Invalid or expired code.");
       }
@@ -166,8 +155,8 @@ export default function LoginPage() {
   async function demoLogin(role: "admin" | "rwa" | "resident" | "guard") {
     setDemoLoading(role);
     try {
-      const data = await callAuth({ provider: "anonymous" });
-      if (data.tokens) {
+      const result = await signIn("anonymous");
+      if (result.signingIn) {
         window.location.href = `/?setup=${role}`;
       } else {
         throw new Error("Demo login failed");
@@ -180,17 +169,20 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex overflow-hidden" style={{ background: "#050508" }}>
-      {/* Background */}
+
+      {/* ── Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <Orb style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "rgba(168,85,247,0.15)" }} animateVals={{ x: [0, 40, 0], y: [0, -30, 0] }} />
         <Orb style={{ width: 400, height: 400, bottom: "0%", right: "30%", background: "rgba(99,102,241,0.1)" }} animateVals={{ x: [0, -30, 0], y: [0, 20, 0] }} />
         <Orb style={{ width: 300, height: 300, top: "30%", right: "5%", background: "rgba(56,189,248,0.07)" }} animateVals={{ x: [0, 20, 0], y: [0, -40, 0] }} />
+        {/* Noise */}
         <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px" }} />
       </div>
 
-      {/* Left panel */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 relative z-10">
+      {/* ── Left panel ── */}
+      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
         <Grid />
+
         <motion.div
           className="w-full max-w-sm space-y-7 relative"
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
@@ -201,7 +193,7 @@ export default function LoginPage() {
           <motion.div className="flex items-center gap-3" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
             <motion.div
               className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, #A855F7, #7C3AED)" }}
+              style={{ background: "linear-gradient(135deg, #A855F7, #7C3AED)", boxShadow: "0 0 24px rgba(168,85,247,0.6)" }}
               animate={{ boxShadow: ["0 0 24px rgba(168,85,247,0.4)", "0 0 40px rgba(168,85,247,0.7)", "0 0 24px rgba(168,85,247,0.4)"] }}
               transition={{ duration: 3, repeat: Infinity }}
               whileHover={{ scale: 1.1, rotate: 6 }}
@@ -211,6 +203,7 @@ export default function LoginPage() {
             <span className="font-bold text-xl tracking-tight text-white">BlockSenseAI</span>
           </motion.div>
 
+          {/* Form steps */}
           <AnimatePresence mode="wait">
             {step === "email" ? (
               <motion.div key="email" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="space-y-6">
@@ -239,7 +232,7 @@ export default function LoginPage() {
                     <motion.button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 overflow-hidden relative"
                       style={{ background: "linear-gradient(90deg, #A855F7, #7C3AED)" }}
                       whileHover={{ scale: 1.02, boxShadow: "0 8px 32px rgba(168,85,247,0.55)" }}
                       whileTap={{ scale: 0.97 }}
@@ -249,19 +242,21 @@ export default function LoginPage() {
                   </form>
                 </TiltCard>
 
+                {/* Divider */}
                 <div className="flex items-center gap-3">
                   <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.07)" }} />
                   <span className="text-[11px] font-mono tracking-widest" style={{ color: "#3F3F46" }}>OR DEMO ACCESS</span>
                   <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.07)" }} />
                 </div>
 
+                {/* Demo buttons */}
                 <div className="space-y-2">
                   {DEMO_ROLES.map(({ role, label, desc, icon: Icon, color, glow }, i) => (
                     <motion.button
                       key={role}
                       onClick={() => demoLogin(role)}
                       disabled={demoLoading !== null}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm disabled:opacity-50"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm disabled:opacity-50 relative overflow-hidden"
                       style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}
                       initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -287,7 +282,7 @@ export default function LoginPage() {
 
                 <TiltCard>
                   <form onSubmit={onOtpSubmit} className="space-y-5 p-5 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", backdropFilter: "blur(16px)" }}>
-                    <div className="flex gap-1.5 sm:gap-2.5" onPaste={handleOtpPaste}>
+                    <div className="flex gap-2.5" onPaste={handleOtpPaste}>
                       {otp.map((digit, i) => (
                         <motion.input
                           key={i}
@@ -298,7 +293,7 @@ export default function LoginPage() {
                           value={digit}
                           onChange={e => handleOtpChange(i, e.target.value)}
                           onKeyDown={e => handleOtpKeyDown(i, e)}
-                          className="flex-1 min-w-0 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold text-white rounded-xl outline-none transition-all duration-150"
+                          className="flex-1 h-14 text-center text-xl font-bold text-white rounded-xl outline-none transition-all duration-150"
                           style={{
                             background: digit ? "rgba(168,85,247,0.18)" : "rgba(255,255,255,0.04)",
                             border: digit ? "2px solid #A855F7" : "1px solid rgba(255,255,255,0.1)",
@@ -344,22 +339,26 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Right panel — hidden on mobile screens */}
+      {/* ── Right panel ── */}
       <div className="hidden lg:flex flex-col items-center justify-center w-[480px] xl:w-[560px] relative overflow-hidden">
         <div className="absolute left-0 top-0 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.4), transparent)" }} />
         <Orb style={{ width: 350, height: 350, top: "10%", right: "10%", background: "rgba(168,85,247,0.1)" }} animateVals={{ scale: [1, 1.1, 1] }} />
 
         <div className="relative z-10 flex flex-col items-center gap-10 px-12 text-center">
+
+          {/* Floating 3D badge */}
           <motion.div className="relative" animate={{ y: [0, -14, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
             <motion.div
               className="w-28 h-28 rounded-3xl flex items-center justify-center"
-              style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", boxShadow: "0 0 60px rgba(168,85,247,0.2)" }}
+              style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", boxShadow: "0 0 60px rgba(168,85,247,0.2), inset 0 0 40px rgba(168,85,247,0.05)" }}
               animate={{ rotate: [0, 3, -3, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             >
               <span className="text-4xl font-black" style={{ background: "linear-gradient(135deg, #A855F7, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BS</span>
             </motion.div>
+            {/* Orbiting dot */}
             <motion.div className="absolute w-3 h-3 rounded-full" style={{ background: "#A855F7", boxShadow: "0 0 12px #A855F7", top: -4, right: -4 }} animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
+            {/* Pulse ring */}
             <motion.div className="absolute inset-0 rounded-3xl" style={{ border: "1px solid rgba(168,85,247,0.3)" }} animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }} transition={{ duration: 2.5, repeat: Infinity }} />
           </motion.div>
 
@@ -373,6 +372,7 @@ export default function LoginPage() {
             </motion.p>
           </div>
 
+          {/* Feature cards */}
           <div className="flex flex-col gap-3 w-full">
             {FEATURES.map(({ icon: Icon, label, color }, i) => (
               <motion.div
@@ -382,7 +382,7 @@ export default function LoginPage() {
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + i * 0.1 }}
-                whileHover={{ x: -4, borderColor: color + "40" }}
+                whileHover={{ x: -4, borderColor: color + "40", backgroundColor: color + "0a" }}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: color + "18" }}>
                   <Icon className="h-4 w-4" style={{ color }} />
@@ -393,6 +393,7 @@ export default function LoginPage() {
             ))}
           </div>
 
+          {/* Stats */}
           <motion.div className="flex gap-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
             {[["500+", "Societies"], ["50K+", "Residents"], ["99.9%", "Uptime"]].map(([val, lbl]) => (
               <div key={lbl} className="text-center">
