@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Users, Home, Zap, BarChart3, Shield, ShieldAlert } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 
 const DEMO_ROLES = [
@@ -81,6 +83,7 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
 
 export default function LoginPage() {
   const { signIn, signOut } = useAuthActions();
+  const sendOTP = useAction(api.otp.sendOTP);
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [emailInput, setEmailInput] = useState("");
@@ -96,8 +99,9 @@ export default function LoginPage() {
     if (!emailInput.trim()) return;
     setLoading(true);
     try {
-      await signIn("resend-otp", { email: emailInput.toLowerCase().trim() });
-      setEmail(emailInput.toLowerCase().trim());
+      const normalised = emailInput.toLowerCase().trim();
+      await sendOTP({ email: normalised });
+      setEmail(normalised);
       setStep("otp");
       toast.success("Code sent — check your inbox");
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
@@ -114,7 +118,7 @@ export default function LoginPage() {
     if (code.length < 6) return;
     setLoading(true);
     try {
-      const result = await signIn("resend-otp", { email, code });
+      const result = await signIn("otp", { email, code });
       if (result.signingIn) {
         window.location.href = "/";
       } else {
