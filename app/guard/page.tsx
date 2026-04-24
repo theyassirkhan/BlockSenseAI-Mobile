@@ -231,35 +231,47 @@ function WalkInForm({ societyId, onDone }: { societyId: any; onDone: () => void 
 }
 
 function QrScanner({ onScan }: { onScan: (code: string) => void }) {
-  const scannerRef = useRef<any>(null);
-  const divId = "qr-scanner-region";
+  const onScanRef = useRef(onScan);
+  onScanRef.current = onScan;
+  const stoppedRef = useRef(false);
 
   useEffect(() => {
-    let html5QrCode: any;
-    import("html5-qrcode").then(({ Html5Qrcode }) => {
-      html5QrCode = new Html5Qrcode(divId);
-      scannerRef.current = html5QrCode;
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText: string) => {
-          // Pass code is 6 digits; gatepass URL contains it at the end
-          const match = decodedText.match(/(\d{6})$/);
-          const code = match ? match[1] : decodedText.trim();
-          onScan(code);
-          html5QrCode.stop().catch(() => {});
-        },
-        () => {}
-      ).catch(() => {});
-    });
+    stoppedRef.current = false;
+    let scanner: any;
+
+    async function start() {
+      try {
+        const { Html5Qrcode } = await import("html5-qrcode");
+        scanner = new Html5Qrcode("qr-scanner-region");
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText: string) => {
+            if (stoppedRef.current) return;
+            stoppedRef.current = true;
+            const match = decodedText.match(/(\d{6})(?:[^0-9]|$)/);
+            const code = match ? match[1] : decodedText.replace(/\D/g, "").slice(-6);
+            scanner.stop().catch(() => {}).finally(() => onScanRef.current(code));
+          },
+          () => {}
+        );
+      } catch {
+        // camera permission denied or unavailable
+      }
+    }
+
+    start();
     return () => {
-      scannerRef.current?.stop().catch(() => {});
+      if (!stoppedRef.current && scanner) {
+        stoppedRef.current = true;
+        scanner.stop().catch(() => {});
+      }
     };
   }, []);
 
   return (
     <div className="rounded-xl overflow-hidden bg-black" style={{ aspectRatio: "1" }}>
-      <div id={divId} className="w-full h-full" />
+      <div id="qr-scanner-region" className="w-full h-full" />
     </div>
   );
 }
