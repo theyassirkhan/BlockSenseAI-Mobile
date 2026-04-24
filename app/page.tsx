@@ -28,14 +28,16 @@ function RootRedirect() {
 
     // Normal login: wait for profile to load then route by role
     if (profile === undefined) return;
-    if (profile === null) {
-      router.replace("/login");
+    if (profile === null || !profile.onboardingComplete) {
+      router.replace("/onboarding");
       return;
     }
     if (profile.role === "platform_admin" || profile.role === "admin") {
       router.replace("/admin");
     } else if (profile.role === "resident") {
       router.replace("/resident");
+    } else if (profile.role === "guard") {
+      router.replace("/guard");
     } else {
       router.replace("/dashboard");
     }

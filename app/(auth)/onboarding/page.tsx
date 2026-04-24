@@ -1,67 +1,151 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, CheckCircle2, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  User, Building2, Users, Home, Shield, ShieldCheck,
+  ChevronRight, ChevronLeft, Loader2, Check, Search,
+  MapPin, Hash, Phone,
+} from "lucide-react";
 
-const STEPS = ["Society", "Blocks", "Tanks", "DG Units", "Vendors"] as const;
+type Role = "admin" | "rwa" | "resident" | "guard";
+type Intent = "create" | "join";
 
-// Step 1
-const societySchema = z.object({
-  name: z.string().min(2, "Name required"),
-  address: z.string().optional(),
-  city: z.string().min(2, "City required"),
-  totalFlats: z.coerce.number().positive().optional(),
-});
+interface StepProps { onNext: (data: any) => void; onBack?: () => void; loading?: boolean }
 
-type SocietyForm = z.infer<typeof societySchema>;
+const ROLES: { value: Role; label: string; desc: string; icon: React.ElementType; color: string; bg: string }[] = [
+  { value: "admin",    label: "Society Admin",  desc: "Create and manage a society",        icon: ShieldCheck, color: "#A855F7", bg: "rgba(168,85,247,0.1)" },
+  { value: "rwa",      label: "RWA Manager",    desc: "Oversee operations and approvals",   icon: Users,       color: "#38BDF8", bg: "rgba(56,189,248,0.1)" },
+  { value: "resident", label: "Resident",       desc: "Track utilities, raise complaints",  icon: Home,        color: "#34D399", bg: "rgba(52,211,153,0.1)" },
+  { value: "guard",    label: "Security Guard", desc: "Manage gate and visitor log",        icon: Shield,      color: "#F97316", bg: "rgba(249,115,22,0.1)" },
+];
 
-interface BlockEntry { name: string; type: "block" | "wing" | "villa" | "tower"; totalFlats?: number; id?: Id<"blocks"> }
-interface TankEntry { name: string; type: "overhead" | "sump" | "borewell_sump"; capacityKL: number; blockId: Id<"blocks"> }
-interface DGEntry { name: string; capacityKVA: number; dieselCapacityLiters: number; dieselLevelLiters: number; consumptionRateLPH: number; blockId: Id<"blocks"> }
-interface VendorEntry { name: string; type: string; phone: string; whatsapp?: string; isPreferred: boolean }
+function ProgressBar({ step, total }: { step: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2 mb-8">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className="h-1 flex-1 rounded-full transition-all duration-500"
+          style={{ background: i < step ? "#A855F7" : "rgba(255,255,255,0.1)" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function NavButton({ onClick, disabled, variant = "primary", children }: {
+  onClick?: () => void; disabled?: boolean; variant?: "primary" | "ghost"; children: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40"
+      style={variant === "primary"
+        ? { background: "linear-gradient(90deg,#A855F7,#7C3AED)", color: "#fff" }
+        : { background: "rgba(255,255,255,0.06)", color: "#A1A1AA", border: "1px solid rgba(255,255,255,0.08)" }
+      }
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const profile = useQuery(api.users.getMyProfile);
+
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [societyId, setSocietyId] = useState<Id<"societies"> | null>(null);
-  const [blocks, setBlocks] = useState<BlockEntry[]>([]);
-  const [tanks, setTanks] = useState<TankEntry[]>([]);
-  const [dgUnits, setDGUnits] = useState<DGEntry[]>([]);
-  const [vendors, setVendors] = useState<VendorEntry[]>([]);
 
-  const createSociety = useMutation(api.societies.create);
-  const addBlock = useMutation(api.societies.addBlock);
-  const addTank = useMutation(api.water.addTank);
-  const addDGUnit = useMutation(api.power.addDGUnit);
-  const createVendor = useMutation(api.vendors.create);
+  // Collected data
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<Role | null>(null);
+  const [intent, setIntent] = useState<Intent | null>(null);
+  const [societyId, setSocietyId] = useState<Id<"societies"> | null>(null);
+  const [blockId, setBlockId] = useState<Id<"blocks"> | null>(null);
+  const [flatNumber, setFlatNumber] = useState("");
+
+  const createProfile   = useMutation(api.users.createProfile);
+  const createSociety   = useMutation(api.societies.create);
+  const addBlock        = useMutation(api.societies.addBlock);
   const setActiveSociety = useMutation(api.users.setActiveSociety);
-  const updateProfile = useMutation(api.users.updateProfile);
   const completeOnboarding = useMutation(api.users.completeOnboarding);
 
-  const societyForm = useForm<SocietyForm>({ resolver: zodResolver(societySchema), defaultValues: { city: "Bangalore" } });
+  // Society create form state
+  const [socName, setSocName] = useState("");
+  const [socCity, setSocCity] = useState("Bangalore");
+  const [socAddress, setSocAddress] = useState("");
+  const [blockName, setBlockName] = useState("Block A");
 
-  // Step 1 — Society
-  async function onSocietySubmit(data: SocietyForm) {
+  // Society join search
+  const societies = useQuery(api.societies.listAll);
+  const [search, setSearch] = useState("");
+
+  // Blocks for join flow
+  const blocks = useQuery(
+    api.societies.getBlocks,
+    societyId ? { societyId } : "skip"
+  );
+
+  const totalSteps = role === "admin" ? 4 : role ? 4 : 3;
+
+  async function handleFinish() {
+    if (!role) return;
     setLoading(true);
     try {
-      const id = await createSociety(data);
+      // 1. Create profile
+      await createProfile({
+        name,
+        role,
+        societyId: societyId ?? undefined,
+        blockId: blockId ?? undefined,
+        flatNumber: flatNumber || undefined,
+        phone: phone || undefined,
+      });
+
+      // 2. If admin created a new society, set as active
+      if (role === "admin" && societyId) {
+        await setActiveSociety({ societyId });
+      }
+
+      // 3. Complete onboarding
+      await completeOnboarding({
+        whatsapp: phone,
+        whatsappVerified: false,
+        societyId: societyId ?? undefined,
+        blockId: blockId ?? undefined,
+      });
+
+      toast.success("Welcome to BlockSense!");
+
+      if (role === "admin") router.replace("/admin");
+      else if (role === "resident") router.replace("/resident");
+      else if (role === "guard") router.replace("/guard");
+      else router.replace("/dashboard");
+    } catch (e: any) {
+      toast.error(e.message ?? "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateSociety() {
+    if (!socName.trim() || !socCity.trim()) return;
+    setLoading(true);
+    try {
+      const id = await createSociety({ name: socName, city: socCity, address: socAddress || undefined });
+      const bId = await addBlock({ societyId: id, name: blockName, type: "block" });
       setSocietyId(id);
-      setStep(1);
+      setBlockId(bId);
+      setStep(s => s + 1);
     } catch {
       toast.error("Failed to create society");
     } finally {
@@ -69,413 +153,420 @@ export default function OnboardingPage() {
     }
   }
 
-  // Step 2 — Blocks (save all)
-  async function saveBlocks() {
-    if (!societyId || blocks.length === 0) { toast.error("Add at least one block"); return; }
-    setLoading(true);
-    try {
-      const withIds: BlockEntry[] = [];
-      for (const b of blocks) {
-        const id = await addBlock({ societyId, name: b.name, type: b.type, totalFlats: b.totalFlats });
-        withIds.push({ ...b, id });
-      }
-      setBlocks(withIds);
-      setStep(2);
-    } catch {
-      toast.error("Failed to save blocks");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Slide animation variants
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit:  (dir: number) => ({ x: dir > 0 ? -40 : 40, opacity: 0 }),
+  };
+  const [dir, setDir] = useState(1);
+  function goNext() { setDir(1); setStep(s => s + 1); }
+  function goBack() { setDir(-1); setStep(s => s - 1); }
 
-  // Step 3 — Tanks
-  async function saveTanks() {
-    if (!societyId) return;
-    setLoading(true);
-    try {
-      for (const t of tanks) {
-        await addTank({ societyId, blockId: t.blockId, name: t.name, type: t.type, capacityKL: t.capacityKL, currentLevelPct: 100 });
-      }
-      setStep(3);
-    } catch {
-      toast.error("Failed to save tanks");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Step 4 — DG Units
-  async function saveDGUnits() {
-    if (!societyId) return;
-    setLoading(true);
-    try {
-      for (const d of dgUnits) {
-        await addDGUnit({ societyId, blockId: d.blockId, name: d.name, capacityKVA: d.capacityKVA, dieselCapacityLiters: d.dieselCapacityLiters, dieselLevelLiters: d.dieselLevelLiters, consumptionRateLPH: d.consumptionRateLPH });
-      }
-      setStep(4);
-    } catch {
-      toast.error("Failed to save DG units");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Step 5 — Vendors + finish
-  async function saveVendorsAndFinish() {
-    if (!societyId) return;
-    setLoading(true);
-    try {
-      for (const v of vendors) {
-        await createVendor({ societyId, name: v.name, type: v.type as any, phone: v.phone, whatsapp: v.whatsapp, isPreferred: v.isPreferred });
-      }
-      await setActiveSociety({ societyId });
-      await completeOnboarding({ whatsapp: "", whatsappVerified: false, societyId });
-      toast.success("Society set up! Welcome to BlockSense.");
-      router.push("/dashboard");
-    } catch {
-      toast.error("Failed to finish setup");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const filteredSocieties = (societies ?? []).filter(s =>
+    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    (s.city ?? "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-xl">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary mb-3">
-            <span className="text-white font-bold text-lg">BS</span>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#050508" }}>
+
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute w-96 h-96 rounded-full -top-20 -left-20 opacity-20"
+          style={{ background: "radial-gradient(circle,#A855F7,transparent)", filter: "blur(80px)" }} />
+        <div className="absolute w-80 h-80 rounded-full bottom-0 right-0 opacity-10"
+          style={{ background: "radial-gradient(circle,#38BDF8,transparent)", filter: "blur(80px)" }} />
+      </div>
+
+      <motion.div
+        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 0 20px rgba(168,85,247,0.5)" }}>
+            <span className="text-white font-bold text-xs">BS</span>
           </div>
-          <h1 className="text-xl font-bold">Set up your society</h1>
-          <p className="text-sm text-muted-foreground">Step {step + 1} of {STEPS.length}</p>
+          <span className="font-bold text-white text-lg">BlockSense</span>
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-1.5 shrink-0">
-              <div className={cn(
-                "flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold transition-colors",
-                i < step ? "bg-primary text-white" : i === step ? "bg-primary text-white ring-2 ring-primary/20" : "bg-muted text-muted-foreground"
-              )}>
-                {i < step ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
-              </div>
-              <span className={cn("text-xs font-medium", i === step ? "text-foreground" : "text-muted-foreground")}>{s}</span>
-              {i < STEPS.length - 1 && <ChevronRight className="w-3 h-3 text-muted-foreground" />}
-            </div>
-          ))}
-        </div>
+        {/* Progress */}
+        <ProgressBar step={step} total={totalSteps} />
 
-        <div className="bg-card rounded-lg border p-6 shadow-sm" style={{ borderColor: "#27272A" }}>
+        {/* Card */}
+        <div className="rounded-2xl p-6 overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
 
-          {/* Step 1: Society */}
-          {step === 0 && (
-            <form onSubmit={societyForm.handleSubmit(onSocietySubmit)} className="space-y-4">
-              <h2 className="font-semibold text-base">Society details</h2>
-              <div className="space-y-1.5">
-                <Label>Society name *</Label>
-                <Input placeholder="e.g. Prestige Lakeside Habitat" {...societyForm.register("name")} />
-                {societyForm.formState.errors.name && <p className="text-xs text-destructive">{societyForm.formState.errors.name.message}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <Label>Address</Label>
-                <Input placeholder="Street address" {...societyForm.register("address")} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>City *</Label>
-                  <Input {...societyForm.register("city")} />
+          <AnimatePresence mode="wait" custom={dir}>
+            <motion.div
+              key={step}
+              custom={dir}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+
+              {/* ── Step 0: Name + Phone ── */}
+              {step === 0 && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">Welcome! 👋</h1>
+                    <p className="text-sm mt-1" style={{ color: "#71717A" }}>Let's get your profile set up.</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium" style={{ color: "#A1A1AA" }}>Full name</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525B" }} />
+                        <input
+                          value={name}
+                          onChange={e => setName(e.target.value)}
+                          placeholder="e.g. Rahul Sharma"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium" style={{ color: "#A1A1AA" }}>Phone number <span style={{ color: "#52525B" }}>(optional)</span></label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525B" }} />
+                        <input
+                          value={phone}
+                          onChange={e => setPhone(e.target.value)}
+                          placeholder="+91 98765 43210"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <NavButton onClick={goNext} disabled={!name.trim()}>
+                    Continue <ChevronRight className="h-4 w-4" />
+                  </NavButton>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Total flats</Label>
-                  <Input type="number" placeholder="240" {...societyForm.register("totalFlats")} />
+              )}
+
+              {/* ── Step 1: Role ── */}
+              {step === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">What's your role?</h1>
+                    <p className="text-sm mt-1" style={{ color: "#71717A" }}>This determines what you can see and do.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {ROLES.map(r => (
+                      <button
+                        key={r.value}
+                        onClick={() => setRole(r.value)}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 text-left"
+                        style={{
+                          background: role === r.value ? r.bg : "rgba(255,255,255,0.02)",
+                          border: `1px solid ${role === r.value ? r.color + "60" : "rgba(255,255,255,0.07)"}`,
+                          boxShadow: role === r.value ? `0 0 20px ${r.color}20` : "none",
+                        }}
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: r.bg }}>
+                          <r.icon className="h-5 w-5" style={{ color: r.color }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white">{r.label}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "#71717A" }}>{r.desc}</p>
+                        </div>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all"
+                          style={{
+                            background: role === r.value ? r.color : "transparent",
+                            border: `2px solid ${role === r.value ? r.color : "rgba(255,255,255,0.2)"}`,
+                          }}>
+                          {role === r.value && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <NavButton variant="ghost" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Back</NavButton>
+                    <NavButton onClick={goNext} disabled={!role}>
+                      Continue <ChevronRight className="h-4 w-4" />
+                    </NavButton>
+                  </div>
                 </div>
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continue
-              </Button>
-            </form>
-          )}
+              )}
 
-          {/* Step 2: Blocks */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="font-semibold text-base">Add blocks / wings</h2>
-              <BlockBuilder blocks={blocks} onChange={setBlocks} />
-              <Button className="w-full" onClick={saveBlocks} disabled={loading || blocks.length === 0}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save &amp; continue
-              </Button>
-            </div>
-          )}
+              {/* ── Step 2: Intent (create or join) ── */}
+              {step === 2 && role !== "admin" && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">Your society</h1>
+                    <p className="text-sm mt-1" style={{ color: "#71717A" }}>Are you creating a new one or joining an existing society?</p>
+                  </div>
 
-          {/* Step 3: Tanks */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h2 className="font-semibold text-base">Add water tanks</h2>
-              <p className="text-xs text-muted-foreground">Add overhead tanks, sumps, or borewells for each block.</p>
-              <TankBuilder blocks={blocks} tanks={tanks} onChange={setTanks} />
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>Skip</Button>
-                <Button className="flex-1" onClick={saveTanks} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save &amp; continue
-                </Button>
-              </div>
-            </div>
-          )}
+                  <div className="space-y-3">
+                    {[
+                      { value: "join" as Intent, label: "Join existing society", desc: "Search for your society by name", icon: Search, color: "#38BDF8" },
+                      { value: "create" as Intent, label: "Create new society", desc: "Set up a society for your community", icon: Building2, color: "#A855F7" },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setIntent(opt.value)}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl transition-all text-left"
+                        style={{
+                          background: intent === opt.value ? `${opt.color}15` : "rgba(255,255,255,0.02)",
+                          border: `1px solid ${intent === opt.value ? opt.color + "50" : "rgba(255,255,255,0.07)"}`,
+                        }}
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${opt.color}18` }}>
+                          <opt.icon className="h-5 w-5" style={{ color: opt.color }} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-white">{opt.label}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "#71717A" }}>{opt.desc}</p>
+                        </div>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all"
+                          style={{
+                            background: intent === opt.value ? opt.color : "transparent",
+                            border: `2px solid ${intent === opt.value ? opt.color : "rgba(255,255,255,0.2)"}`,
+                          }}>
+                          {intent === opt.value && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
 
-          {/* Step 4: DG Units */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2 className="font-semibold text-base">Add diesel generator units</h2>
-              <DGBuilder blocks={blocks} dgUnits={dgUnits} onChange={setDGUnits} />
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(4)}>Skip</Button>
-                <Button className="flex-1" onClick={saveDGUnits} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save &amp; continue
-                </Button>
-              </div>
-            </div>
-          )}
+                  {/* Join: society search */}
+                  {intent === "join" && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525B" }} />
+                        <input
+                          value={search}
+                          onChange={e => setSearch(e.target.value)}
+                          placeholder="Search society name or city…"
+                          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(56,189,248,0.7)")}
+                          onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                        {filteredSocieties.length === 0 && (
+                          <p className="text-xs text-center py-4" style={{ color: "#52525B" }}>No societies found</p>
+                        )}
+                        {filteredSocieties.map(s => (
+                          <button
+                            key={s._id}
+                            onClick={() => setSocietyId(s._id)}
+                            className="w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left"
+                            style={{
+                              background: societyId === s._id ? "rgba(56,189,248,0.12)" : "rgba(255,255,255,0.03)",
+                              border: `1px solid ${societyId === s._id ? "rgba(56,189,248,0.4)" : "rgba(255,255,255,0.06)"}`,
+                            }}
+                          >
+                            <Building2 className="h-4 w-4 shrink-0" style={{ color: "#38BDF8" }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate">{s.name}</p>
+                              <p className="text-xs" style={{ color: "#71717A" }}>{s.city}</p>
+                            </div>
+                            {societyId === s._id && <Check className="h-4 w-4 shrink-0" style={{ color: "#38BDF8" }} />}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
-          {/* Step 5: Vendors */}
-          {step === 4 && (
-            <div className="space-y-4">
-              <h2 className="font-semibold text-base">Add vendors</h2>
-              <VendorBuilder vendors={vendors} onChange={setVendors} />
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={saveVendorsAndFinish} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Skip &amp; finish
-                </Button>
-                <Button className="flex-1" onClick={saveVendorsAndFinish} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save &amp; finish
-                </Button>
-              </div>
-            </div>
-          )}
+                  {/* Create: basic society form */}
+                  {intent === "create" && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                      <input value={socName} onChange={e => setSocName(e.target.value)} placeholder="Society name *"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                        onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
+                      <input value={socCity} onChange={e => setSocCity(e.target.value)} placeholder="City *"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                        onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
+                    </motion.div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <NavButton variant="ghost" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Back</NavButton>
+                    {intent === "join" && (
+                      <NavButton onClick={goNext} disabled={!societyId}>
+                        Continue <ChevronRight className="h-4 w-4" />
+                      </NavButton>
+                    )}
+                    {intent === "create" && (
+                      <NavButton onClick={async () => { await handleCreateSociety(); }} disabled={loading || !socName.trim() || !socCity.trim()}>
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Create <ChevronRight className="h-4 w-4" /></>}
+                      </NavButton>
+                    )}
+                    {!intent && <NavButton disabled>Continue <ChevronRight className="h-4 w-4" /></NavButton>}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Step 2 (admin): Create society ── */}
+              {step === 2 && role === "admin" && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">Create your society</h1>
+                    <p className="text-sm mt-1" style={{ color: "#71717A" }}>You can add more details from the admin panel later.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: socName, setter: setSocName, placeholder: "Society name *", icon: Building2 },
+                      { value: socCity, setter: setSocCity, placeholder: "City *", icon: MapPin },
+                      { value: socAddress, setter: setSocAddress, placeholder: "Address (optional)", icon: MapPin },
+                      { value: blockName, setter: setBlockName, placeholder: "First block name *", icon: Hash },
+                    ].map(({ value, setter, placeholder, icon: Icon }) => (
+                      <div key={placeholder} className="relative">
+                        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525B" }} />
+                        <input value={value} onChange={e => setter(e.target.value)} placeholder={placeholder}
+                          className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <NavButton variant="ghost" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Back</NavButton>
+                    <NavButton
+                      onClick={handleCreateSociety}
+                      disabled={loading || !socName.trim() || !socCity.trim() || !blockName.trim()}
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Continue <ChevronRight className="h-4 w-4" /></>}
+                    </NavButton>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Step 3: Flat / block details (resident/guard/rwa) ── */}
+              {step === 3 && role !== "admin" && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">Your unit details</h1>
+                    <p className="text-sm mt-1" style={{ color: "#71717A" }}>Help us place you in the right block and flat.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Block selector */}
+                    {societyId && blocks && blocks.length > 0 && (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium" style={{ color: "#A1A1AA" }}>Block / Wing</label>
+                        <div className="flex flex-wrap gap-2">
+                          {blocks.map(b => (
+                            <button
+                              key={b._id}
+                              onClick={() => setBlockId(b._id)}
+                              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                              style={{
+                                background: blockId === b._id ? "rgba(168,85,247,0.2)" : "rgba(255,255,255,0.04)",
+                                border: `1px solid ${blockId === b._id ? "rgba(168,85,247,0.6)" : "rgba(255,255,255,0.08)"}`,
+                                color: blockId === b._id ? "#C084FC" : "#A1A1AA",
+                              }}
+                            >
+                              {b.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {role === "resident" && (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium" style={{ color: "#A1A1AA" }}>Flat / Unit number</label>
+                        <div className="relative">
+                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#52525B" }} />
+                          <input
+                            value={flatNumber}
+                            onChange={e => setFlatNumber(e.target.value)}
+                            placeholder="e.g. A-204"
+                            className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                            onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <NavButton variant="ghost" onClick={goBack}><ChevronLeft className="h-4 w-4" /> Back</NavButton>
+                    <NavButton onClick={handleFinish} disabled={loading}>
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Finish setup ✓"}
+                    </NavButton>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Step 3 (admin): Finish ── */}
+              {step === 3 && role === "admin" && (
+                <div className="space-y-6">
+                  <div className="text-center py-4">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4"
+                      style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 0 40px rgba(168,85,247,0.4)" }}
+                    >
+                      <Check className="h-8 w-8 text-white" />
+                    </motion.div>
+                    <h1 className="text-2xl font-bold text-white">You're all set!</h1>
+                    <p className="text-sm mt-2" style={{ color: "#71717A" }}>
+                      Society created. You'll be taken to your admin dashboard where you can add residents, configure utilities, and more.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl p-4 space-y-2" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
+                    {[
+                      ["Name", name],
+                      ["Role", "Society Admin"],
+                      ["Society", socName],
+                      ["City", socCity],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between text-sm">
+                        <span style={{ color: "#71717A" }}>{label}</span>
+                        <span className="text-white font-medium">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <NavButton onClick={handleFinish} disabled={loading}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Go to dashboard →"}
+                  </NavButton>
+                </div>
+              )}
+
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function BlockBuilder({ blocks, onChange }: { blocks: BlockEntry[]; onChange: (b: BlockEntry[]) => void }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<BlockEntry["type"]>("block");
-  const [totalFlats, setTotalFlats] = useState("");
-
-  function add() {
-    if (!name.trim()) return;
-    onChange([...blocks, { name: name.trim(), type, totalFlats: totalFlats ? Number(totalFlats) : undefined }]);
-    setName(""); setTotalFlats("");
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2 items-end">
-        <div className="space-y-1">
-          <Label className="text-xs">Name</Label>
-          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Block A" onKeyDown={e => e.key === "Enter" && add()} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Type</Label>
-          <Select value={type} onValueChange={v => setType(v as any)}>
-            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="block">Block</SelectItem>
-              <SelectItem value="wing">Wing</SelectItem>
-              <SelectItem value="villa">Villa</SelectItem>
-              <SelectItem value="tower">Tower</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Flats</Label>
-          <Input className="w-16" type="number" value={totalFlats} onChange={e => setTotalFlats(e.target.value)} placeholder="60" />
-        </div>
-        <Button type="button" size="icon" onClick={add} className="mb-0"><Plus className="h-4 w-4" /></Button>
-      </div>
-      {blocks.length > 0 && (
-        <ul className="space-y-1.5">
-          {blocks.map((b, i) => (
-            <li key={i} className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-sm">
-              <span className="font-medium">{b.name}</span>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs capitalize">{b.type}</Badge>
-                {b.totalFlats && <span className="text-xs text-muted-foreground">{b.totalFlats} flats</span>}
-                <button onClick={() => onChange(blocks.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function TankBuilder({ blocks, tanks, onChange }: { blocks: BlockEntry[]; tanks: TankEntry[]; onChange: (t: TankEntry[]) => void }) {
-  const [name, setName] = useState("Overhead Tank 1");
-  const [type, setType] = useState<TankEntry["type"]>("overhead");
-  const [capacityKL, setCapacityKL] = useState("50");
-  const [blockId, setBlockId] = useState<string>(blocks[0]?.id ?? "");
-
-  function add() {
-    if (!blockId || !name) return;
-    onChange([...tanks, { name, type, capacityKL: Number(capacityKL), blockId: blockId as Id<"blocks"> }]);
-    setName(`Tank ${tanks.length + 2}`);
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="space-y-1">
-          <Label className="text-xs">Block</Label>
-          <Select value={blockId} onValueChange={setBlockId}>
-            <SelectTrigger><SelectValue placeholder="Select block" /></SelectTrigger>
-            <SelectContent>
-              {blocks.map(b => b.id && <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Type</Label>
-          <Select value={type} onValueChange={v => setType(v as any)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="overhead">Overhead</SelectItem>
-              <SelectItem value="sump">Sump</SelectItem>
-              <SelectItem value="borewell_sump">Borewell Sump</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Name</Label>
-          <Input value={name} onChange={e => setName(e.target.value)} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Capacity (KL)</Label>
-          <Input type="number" value={capacityKL} onChange={e => setCapacityKL(e.target.value)} />
-        </div>
-      </div>
-      <Button type="button" variant="outline" size="sm" onClick={add} className="w-full gap-2"><Plus className="h-3.5 w-3.5" />Add tank</Button>
-      {tanks.length > 0 && (
-        <ul className="space-y-1">
-          {tanks.map((t, i) => (
-            <li key={i} className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-sm">
-              <span>{t.name} — {t.capacityKL} KL</span>
-              <button onClick={() => onChange(tanks.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function DGBuilder({ blocks, dgUnits, onChange }: { blocks: BlockEntry[]; dgUnits: DGEntry[]; onChange: (d: DGEntry[]) => void }) {
-  const [name, setName] = useState("DG Unit 1");
-  const [capacityKVA, setCapacityKVA] = useState("62.5");
-  const [dieselCap, setDieselCap] = useState("250");
-  const [dieselLevel, setDieselLevel] = useState("200");
-  const [rate, setRate] = useState("3.5");
-  const [blockId, setBlockId] = useState<string>(blocks[0]?.id ?? "");
-
-  function add() {
-    if (!blockId) return;
-    onChange([...dgUnits, { name, capacityKVA: Number(capacityKVA), dieselCapacityLiters: Number(dieselCap), dieselLevelLiters: Number(dieselLevel), consumptionRateLPH: Number(rate), blockId: blockId as Id<"blocks"> }]);
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="space-y-1 col-span-2">
-          <Label className="text-xs">Block</Label>
-          <Select value={blockId} onValueChange={setBlockId}>
-            <SelectTrigger><SelectValue placeholder="Select block" /></SelectTrigger>
-            <SelectContent>
-              {blocks.map(b => b.id && <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1"><Label className="text-xs">Name</Label><Input value={name} onChange={e => setName(e.target.value)} /></div>
-        <div className="space-y-1"><Label className="text-xs">Capacity (kVA)</Label><Input type="number" value={capacityKVA} onChange={e => setCapacityKVA(e.target.value)} /></div>
-        <div className="space-y-1"><Label className="text-xs">Tank capacity (L)</Label><Input type="number" value={dieselCap} onChange={e => setDieselCap(e.target.value)} /></div>
-        <div className="space-y-1"><Label className="text-xs">Current level (L)</Label><Input type="number" value={dieselLevel} onChange={e => setDieselLevel(e.target.value)} /></div>
-        <div className="space-y-1 col-span-2"><Label className="text-xs">Consumption rate (L/hr)</Label><Input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} /></div>
-      </div>
-      <Button type="button" variant="outline" size="sm" onClick={add} className="w-full gap-2"><Plus className="h-3.5 w-3.5" />Add DG unit</Button>
-      {dgUnits.length > 0 && (
-        <ul className="space-y-1">
-          {dgUnits.map((d, i) => (
-            <li key={i} className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-sm">
-              <span>{d.name} — {d.capacityKVA} kVA</span>
-              <button onClick={() => onChange(dgUnits.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function VendorBuilder({ vendors, onChange }: { vendors: VendorEntry[]; onChange: (v: VendorEntry[]) => void }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState("water_tanker");
-  const [phone, setPhone] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-
-  const VENDOR_TYPES = [
-    { value: "water_tanker", label: "Water Tanker" },
-    { value: "diesel", label: "Diesel" },
-    { value: "gas", label: "Gas" },
-    { value: "desludge", label: "Desludge" },
-    { value: "garbage", label: "Garbage" },
-    { value: "electrical", label: "Electrical" },
-    { value: "plumbing", label: "Plumbing" },
-    { value: "other", label: "Other" },
-  ];
-
-  function add() {
-    if (!name || !phone) { toast.error("Name and phone required"); return; }
-    onChange([...vendors, { name, type, phone, whatsapp: whatsapp || undefined, isPreferred: true }]);
-    setName(""); setPhone(""); setWhatsapp("");
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="space-y-1"><Label className="text-xs">Name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Ravi Water Tankers" /></div>
-        <div className="space-y-1">
-          <Label className="text-xs">Type</Label>
-          <Select value={type} onValueChange={setType}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{VENDOR_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1"><Label className="text-xs">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="9876543210" /></div>
-        <div className="space-y-1"><Label className="text-xs">WhatsApp</Label><Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="Same as phone" /></div>
-      </div>
-      <Button type="button" variant="outline" size="sm" onClick={add} className="w-full gap-2"><Plus className="h-3.5 w-3.5" />Add vendor</Button>
-      {vendors.length > 0 && (
-        <ul className="space-y-1">
-          {vendors.map((v, i) => (
-            <li key={i} className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-sm">
-              <span>{v.name} — {v.phone}</span>
-              <button onClick={() => onChange(vendors.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
-            </li>
-          ))}
-        </ul>
-      )}
+        {/* Step counter */}
+        <p className="text-center text-xs mt-4" style={{ color: "#3F3F46" }}>
+          Step {step + 1} of {totalSteps}
+        </p>
+      </motion.div>
     </div>
   );
 }
