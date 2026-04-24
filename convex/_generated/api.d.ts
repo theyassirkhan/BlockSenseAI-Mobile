@@ -9,6 +9,7 @@
  */
 
 import type * as adminTickets from "../adminTickets.js";
+import type * as ai from "../ai.js";
 import type * as alerts from "../alerts.js";
 import type * as auth from "../auth.js";
 import type * as broadcastsService from "../broadcastsService.js";
@@ -46,6 +47,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adminTickets: typeof adminTickets;
+  ai: typeof ai;
   alerts: typeof alerts;
   auth: typeof auth;
   broadcastsService: typeof broadcastsService;
