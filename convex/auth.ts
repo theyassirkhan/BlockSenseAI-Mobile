@@ -1,17 +1,18 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
-import { Email } from "@convex-dev/auth/providers/Email";
+import Resend from "@auth/core/providers/resend";
+import { Resend as ResendAPI } from "resend";
+import { alphabet, generateRandomString } from "oslo/crypto";
 
-const ResendOTP = Email({
+const ResendOTP = Resend({
   id: "resend-otp",
-  from: "BlockSense <onboarding@resend.dev>",
+  apiKey: process.env.AUTH_RESEND_KEY,
   maxAge: 60 * 60,
-  generateVerificationToken: async () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+  async generateVerificationToken() {
+    return generateRandomString(6, alphabet("0-9"));
   },
-  sendVerificationRequest: async ({ identifier: email, token }: any) => {
-    const { Resend } = await import("resend");
-    const resend = new Resend(process.env.AUTH_RESEND_KEY);
+  async sendVerificationRequest({ identifier: email, provider, token }: any) {
+    const resend = new ResendAPI(provider.apiKey);
     const { error } = await resend.emails.send({
       from: "BlockSense <onboarding@resend.dev>",
       to: [email],
@@ -25,7 +26,7 @@ const ResendOTP = Email({
           <div style="background:#fff;border-radius:8px;padding:32px;border:0.5px solid #CCCCCC;">
             <h2 style="color:#1A1A1A;margin:0 0 8px;font-size:20px;">Your sign-in code</h2>
             <p style="color:#6b7280;margin:0 0 24px;font-size:14px;">Enter this code to sign in to BlockSense. Valid for 10 minutes.</p>
-            <div style="background:#F6F5F1;border-radius:8px;padding:24px;text-align:center;letter-spacing:12px;font-size:36px;font-weight:700;color:#0F6E56;font-variant-numeric:tabular-nums;">
+            <div style="background:#F6F5F1;border-radius:8px;padding:24px;text-align:center;letter-spacing:16px;font-size:40px;font-weight:700;color:#0F6E56;font-variant-numeric:tabular-nums;">
               ${token}
             </div>
             <p style="color:#9ca3af;font-size:12px;margin:24px 0 0;text-align:center;">If you did not request this, ignore this email.</p>
