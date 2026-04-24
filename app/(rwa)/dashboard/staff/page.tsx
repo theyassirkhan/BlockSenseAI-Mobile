@@ -356,7 +356,7 @@ export default function StaffPage() {
                     const color = SHIFT_COLORS[s.shiftType] ?? "#A855F7";
                     return (
                       <div key={s._id} className="rounded-lg p-1.5 space-y-1" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-                        <p className="text-[10px] font-medium leading-tight truncate" style={{ color }}>{member?.name ?? "—"}</p>
+                        <p className="text-[10px] font-medium leading-tight truncate" style={{ color }}>{(member as any)?.name ?? "—"}</p>
                         <p className="text-[9px] text-muted-foreground">{s.startTime}–{s.endTime}</p>
                         <Select
                           value={s.status}
