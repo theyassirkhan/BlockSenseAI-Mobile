@@ -5,17 +5,19 @@ import { api } from "@/convex/_generated/api";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Shield, UserPlus, Search, LogOut, LogIn, Camera, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { Shield, UserPlus, Search, LogOut, LogIn, Camera, CheckCircle2, Clock, Loader2, History, VideoOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Suspense } from "react";
 
-const GUARD_SOCIETY_KEY = "guard_societyId";
-
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatDate(ts: number) {
+  return new Date(ts).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function GuardPageInner() {
@@ -39,20 +41,18 @@ function GuardPageInner() {
 
   const societyId = profile?.societyId as any;
 
-  // Show spinner while demo is being set up or profile is still loading
   if (settingUp || profile === undefined) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center gap-3 text-white">
+      <div className="min-h-dvh bg-gray-950 flex items-center justify-center gap-3 text-white">
         <Loader2 className="h-5 w-5 animate-spin text-orange-400" />
         <span className="text-sm">{settingUp ? "Setting up guard demo…" : "Loading…"}</span>
       </div>
     );
   }
 
-  // Not authenticated or no society assigned
   if (!societyId) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+      <div className="min-h-dvh bg-gray-950 flex items-center justify-center p-6">
         <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-sm space-y-4 text-center">
           <Shield className="h-10 w-10 text-orange-400 mx-auto" />
           <h1 className="font-bold text-lg text-white">Guard Access Required</h1>
@@ -66,8 +66,9 @@ function GuardPageInner() {
 }
 
 function GuardDashboard({ societyId }: { societyId: any }) {
-  const [tab, setTab] = useState<"log" | "walkin" | "scan">("log");
+  const [tab, setTab] = useState<"log" | "walkin" | "scan" | "history">("log");
   const todayLog = useQuery(api.visitors.getTodayLog, { societyId });
+  const history = useQuery(api.visitors.getHistory, tab === "history" ? { societyId, limit: 50 } : "skip");
   const checkIn = useMutation(api.visitors.checkIn);
   const checkOut = useMutation(api.visitors.checkOut);
 
@@ -75,8 +76,7 @@ function GuardDashboard({ societyId }: { societyId: any }) {
   const total = todayLog?.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
+    <div className="min-h-dvh bg-gray-950 text-white">
       <div className="bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-blue-400" />
@@ -88,15 +88,14 @@ function GuardDashboard({ societyId }: { societyId: any }) {
         </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex border-b border-gray-800 bg-gray-900">
-        {(["log", "walkin", "scan"] as const).map(t => (
+      <div className="flex border-b border-gray-800 bg-gray-900 overflow-x-auto">
+        {(["log", "walkin", "scan", "history"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${tab === t ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-500 hover:text-gray-300"}`}
+            className={`flex-1 min-w-[72px] py-3 text-xs font-medium transition-colors whitespace-nowrap px-2 ${tab === t ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-500 hover:text-gray-300"}`}
           >
-            {t === "log" ? "Today's Log" : t === "walkin" ? "Walk-in Entry" : "Scan Pass"}
+            {t === "log" ? "Today's Log" : t === "walkin" ? "Walk-in" : t === "scan" ? "Scan Pass" : "History"}
           </button>
         ))}
       </div>
@@ -107,6 +106,7 @@ function GuardDashboard({ societyId }: { societyId: any }) {
         )}
         {tab === "walkin" && <WalkInForm societyId={societyId} onDone={() => setTab("log")} />}
         {tab === "scan" && <ScanPass societyId={societyId} onCheckIn={checkIn} />}
+        {tab === "history" && <HistoryLog visitors={history ?? []} loading={history === undefined} />}
       </div>
     </div>
   );
@@ -115,9 +115,10 @@ function GuardDashboard({ societyId }: { societyId: any }) {
 function TodayLog({ visitors, onCheckIn, onCheckOut }: { visitors: any[]; onCheckIn: any; onCheckOut: any }) {
   if (visitors.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-500">
+      <div className="text-center py-16 text-gray-500 space-y-2">
         <Clock className="h-10 w-10 mx-auto mb-3 opacity-30" />
-        <p>No visitors today</p>
+        <p className="text-sm font-medium">No visitors logged yet today</p>
+        <p className="text-xs text-gray-600">Use the Walk-in tab to log a visitor,<br />or Scan Pass to check in a pre-registered guest.</p>
       </div>
     );
   }
@@ -154,6 +155,48 @@ function TodayLog({ visitors, onCheckIn, onCheckOut }: { visitors: any[]; onChec
             {v.checkedOutAt && (
               <CheckCircle2 className="h-5 w-5 text-gray-600" />
             )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function HistoryLog({ visitors, loading }: { visitors: any[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-gray-500">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+        <span className="text-sm">Loading history…</span>
+      </div>
+    );
+  }
+  if (visitors.length === 0) {
+    return (
+      <div className="text-center py-16 text-gray-500">
+        <History className="h-10 w-10 mx-auto mb-3 opacity-30" />
+        <p className="text-sm">No visitor history yet</p>
+      </div>
+    );
+  }
+  return (
+    <ul className="space-y-2">
+      {visitors.map(v => (
+        <li key={v._id} className="bg-gray-900 rounded-xl p-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-semibold text-sm truncate">{v.visitorName}</p>
+            <p className="text-xs text-gray-400 truncate">{v.residentName ?? "—"} · Flat {v.flatNumber ?? "—"}</p>
+            <p className="text-[11px] text-gray-600 mt-0.5">{formatDate(v.createdAt)}</p>
+          </div>
+          <div className="shrink-0 text-right">
+            {v.checkedOutAt ? (
+              <span className="text-[10px] bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full">Exited</span>
+            ) : v.checkedInAt ? (
+              <span className="text-[10px] bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full">Inside</span>
+            ) : (
+              <span className="text-[10px] bg-yellow-900/30 text-yellow-400 px-2 py-0.5 rounded-full">Expected</span>
+            )}
+            <p className="text-[10px] text-gray-600 mt-1">{v.passCode}</p>
           </div>
         </li>
       ))}
@@ -213,7 +256,6 @@ function WalkInForm({ societyId, onDone }: { societyId: any; onDone: () => void 
         </div>
       ))}
 
-      {/* Camera capture for photo evidence */}
       <div className="space-y-1.5">
         <Label className="text-gray-300 text-xs">Photo (optional)</Label>
         <label className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 cursor-pointer text-sm text-gray-400 hover:border-gray-600">
@@ -234,9 +276,11 @@ function QrScanner({ onScan }: { onScan: (code: string) => void }) {
   const onScanRef = useRef(onScan);
   onScanRef.current = onScan;
   const stoppedRef = useRef(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   useEffect(() => {
     stoppedRef.current = false;
+    setCameraError(null);
     let scanner: any;
 
     async function start() {
@@ -255,8 +299,17 @@ function QrScanner({ onScan }: { onScan: (code: string) => void }) {
           },
           () => {}
         );
-      } catch {
-        // camera permission denied or unavailable
+      } catch (err: any) {
+        const msg = err?.message ?? "";
+        if (msg.includes("permission") || msg.includes("NotAllowed")) {
+          setCameraError("Camera permission denied. Please allow camera access in your browser settings.");
+        } else if (msg.includes("NotFound") || msg.includes("Devices could not be found")) {
+          setCameraError("No camera found on this device.");
+        } else if (typeof window !== "undefined" && window.location.protocol !== "https:") {
+          setCameraError("Camera requires HTTPS. Please access this page over a secure connection.");
+        } else {
+          setCameraError("Camera unavailable. Enter the pass code manually below.");
+        }
       }
     }
 
@@ -268,6 +321,15 @@ function QrScanner({ onScan }: { onScan: (code: string) => void }) {
       }
     };
   }, []);
+
+  if (cameraError) {
+    return (
+      <div className="rounded-xl bg-gray-900 border border-gray-700 p-6 text-center space-y-3">
+        <VideoOff className="h-8 w-8 text-gray-500 mx-auto" />
+        <p className="text-sm text-gray-400">{cameraError}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl overflow-hidden bg-black" style={{ aspectRatio: "1" }}>
@@ -292,7 +354,6 @@ function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) 
         <Search className="h-4 w-4 text-blue-400" /> Scan / Enter Pass Code
       </h2>
 
-      {/* Camera scan button */}
       {!scanning && (
         <button
           onClick={() => { setCode(""); setScanning(true); }}
@@ -302,7 +363,6 @@ function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) 
         </button>
       )}
 
-      {/* Live camera scanner */}
       {scanning && (
         <div className="space-y-2">
           <QrScanner onScan={handleScan} />
@@ -315,7 +375,6 @@ function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) 
         </div>
       )}
 
-      {/* Manual entry */}
       {!scanning && (
         <>
           <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -373,7 +432,7 @@ function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) 
 
 export default function GuardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-950 flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-dvh bg-gray-950 flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" /></div>}>
       <GuardPageInner />
     </Suspense>
   );

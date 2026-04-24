@@ -168,7 +168,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex overflow-hidden" style={{ background: "#050508" }}>
+    <div className="min-h-dvh flex overflow-hidden" style={{ background: "#050508" }}>
 
       {/* ── Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

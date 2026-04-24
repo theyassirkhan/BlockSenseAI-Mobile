@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center gap-6">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-6">
       <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-[#0F6E56] text-white text-2xl font-bold shadow-lg">
         BS
       </div>

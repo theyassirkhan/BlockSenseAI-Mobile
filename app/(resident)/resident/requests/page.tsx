@@ -2,15 +2,14 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ClipboardList, Plus, Star } from "lucide-react";
+import { ClipboardList, Plus, Star, Camera, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/utils";
 import { Id } from "@/convex/_generated/dataModel";
@@ -31,24 +30,59 @@ export default function ResidentRequestsPage() {
   const myRequests = useQuery(api.serviceRequests.getMyRequests, societyId ? { societyId } : "skip");
   const createRequest = useMutation(api.serviceRequests.create);
   const rateRequest = useMutation(api.serviceRequests.rate);
+  const generateUploadUrl = useMutation(api.serviceRequests.generateUploadUrl);
 
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ category: "plumbing", description: "", priority: "medium" as "low" | "medium" | "urgent" });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhoto() {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   async function handleCreate() {
     if (!societyId || !blockId || !form.description) return toast.error("Description required — make sure your block is set in your profile");
     setSaving(true);
     try {
+      let photoStorageId: Id<"_storage"> | undefined;
+
+      if (photoFile) {
+        const uploadUrl = await generateUploadUrl();
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": photoFile.type },
+          body: photoFile,
+        });
+        if (!res.ok) throw new Error("Photo upload failed");
+        const { storageId } = await res.json();
+        photoStorageId = storageId;
+      }
+
       await createRequest({
         societyId,
         blockId: blockId as any,
         category: form.category,
         description: form.description,
         priority: form.priority,
+        photoStorageId,
       });
       toast.success("Request submitted");
       setForm({ category: "plumbing", description: "", priority: "medium" });
+      clearPhoto();
       setShowForm(false);
     } catch (e: any) {
       toast.error(e.message);
@@ -109,9 +143,39 @@ export default function ResidentRequestsPage() {
               <Label>Description *</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Describe the issue in detail…" />
             </div>
+
+            {/* Photo upload */}
+            <div className="space-y-1.5">
+              <Label>Photo evidence (optional)</Label>
+              {photoPreview ? (
+                <div className="relative inline-block">
+                  <img src={photoPreview} alt="Preview" className="rounded-lg w-32 h-32 object-cover border border-border" />
+                  <button
+                    onClick={clearPhoto}
+                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 border border-dashed border-border rounded-lg px-4 py-3 cursor-pointer text-sm text-muted-foreground hover:border-primary/50 transition-colors">
+                  <Camera className="h-4 w-4" />
+                  <span>Take photo or upload</span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
+                </label>
+              )}
+            </div>
+
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate} disabled={saving}>{saving ? "Submitting…" : "Submit"}</Button>
-              <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button size="sm" variant="outline" onClick={() => { setShowForm(false); clearPhoto(); }}>Cancel</Button>
             </div>
           </CardContent>
         </Card>
@@ -125,7 +189,14 @@ export default function ResidentRequestsPage() {
                 <div className="min-w-0">
                   <p className="font-medium text-sm capitalize">{r.category.replace("_", " ")}</p>
                   <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{r.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{formatDateTime(r.createdAt)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {r.photoStorageId && (
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <ImageIcon className="h-3 w-3" /> Photo attached
+                      </span>
+                    )}
+                    <p className="text-xs text-muted-foreground">{formatDateTime(r.createdAt)}</p>
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <Badge variant={STATUS_COLOR[r.status] ?? "secondary"} className="text-[10px]">

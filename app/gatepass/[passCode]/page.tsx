@@ -31,7 +31,7 @@ function GatepassInner() {
 
   if (visitor === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0612]">
+      <div className="min-h-dvh flex items-center justify-center bg-[#0a0612]">
         <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
       </div>
     );
@@ -39,7 +39,7 @@ function GatepassInner() {
 
   if (visitor === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0612] p-6">
+      <div className="min-h-dvh flex items-center justify-center bg-[#0a0612] p-6">
         <div className="text-center space-y-3">
           <XCircle className="h-12 w-12 text-red-400 mx-auto" />
           <p className="text-white font-bold text-lg">Invalid Gate Pass</p>
@@ -54,7 +54,7 @@ function GatepassInner() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-dvh flex items-center justify-center p-4"
       style={{ background: "linear-gradient(135deg, #0a0612 0%, #130a2e 50%, #0a0612 100%)" }}
     >
       {/* Card */}
@@ -171,7 +171,7 @@ function GatepassInner() {
 export default function GatepassPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0612]">
+      <div className="min-h-dvh flex items-center justify-center bg-[#0a0612]">
         <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
       </div>
     }>
