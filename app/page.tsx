@@ -18,6 +18,8 @@ function RootRedirect() {
         router.replace(`/admin?setup=admin`);
       } else if (setup === "resident") {
         router.replace(`/resident?setup=resident`);
+      } else if (setup === "guard") {
+        router.replace(`/guard?setup=guard`);
       } else {
         router.replace(`/dashboard?setup=${setup}`);
       }

@@ -8,50 +8,67 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { GlassStatCard } from "@/components/ui/glass-stat-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { formatDateTime, levelColor, daysFromNow } from "@/lib/utils";
 import {
   Droplets, Zap, AlertTriangle, CheckCircle2, Flame, Wind,
-  Trash2, Sparkles, Loader2,
+  Sparkles, Loader2,
 } from "lucide-react";
+import { PdfReportButton } from "@/components/ui/pdf-report";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 function HealthGauge({ score, grade }: { score: number; grade: string }) {
-  const color =
-    score >= 85 ? "#22c55e" : score >= 70 ? "#84cc16" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const label =
-    score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Needs attention";
+  const color = score >= 85 ? "#22c55e" : score >= 70 ? "#84cc16" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const label = score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Needs attention";
 
   return (
-    <div className="flex items-center gap-4">
+    <motion.div
+      className="flex items-center gap-5 p-5 rounded-2xl"
+      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="relative w-20 h-20 shrink-0">
         <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
-          <circle cx="40" cy="40" r="32" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-          <circle
+          <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+          <motion.circle
             cx="40" cy="40" r="32"
             fill="none"
             stroke={color}
             strokeWidth="8"
-            strokeDasharray={`${(score / 100) * 201} 201`}
             strokeLinecap="round"
+            strokeDasharray="201"
+            initial={{ strokeDashoffset: 201 }}
+            animate={{ strokeDashoffset: 201 - (score / 100) * 201 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            style={{ filter: `drop-shadow(0 0 6px ${color})` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xl font-bold leading-none" style={{ color }}>{score}</span>
-          <span className="text-xs font-semibold" style={{ color }}>{grade}</span>
+          <span className="text-xs font-bold" style={{ color }}>{grade}</span>
         </div>
       </div>
       <div>
-        <p className="font-semibold text-sm">{label}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">Society Health Score</p>
+        <p className="font-bold text-white text-lg">{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Society Health Score</p>
+        <div className="flex items-center gap-1.5 mt-2">
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: color }} />
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Live monitoring</span>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-export default function DashboardPage() {
+function DashboardPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setupDemoUser = useMutation(api.demo.setupDemoUser);
@@ -65,9 +82,10 @@ export default function DashboardPage() {
     const setup = searchParams.get("setup") as "admin" | "rwa" | "resident" | null;
     if (!setup || setupDone.current) return;
     setupDone.current = true;
-    setupDemoUser({ role: setup }).then(() => {
-      router.replace("/dashboard");
-    }).catch(console.error);
+    setupDemoUser({ role: setup })
+      .then(() => seedAllDemoData({}))
+      .catch(() => {})
+      .finally(() => router.replace("/dashboard"));
   }, [searchParams]);
 
   const { blockId } = useActiveBlock(profile?.defaultBlockId);
@@ -88,11 +106,8 @@ export default function DashboardPage() {
     setSeeding(true);
     try {
       const result = await seedAllDemoData({});
-      if ((result as any)?.skipped) {
-        toast.info("Demo data already seeded");
-      } else {
-        toast.success("90 days of demo data seeded successfully");
-      }
+      if ((result as any)?.skipped) toast.info("Demo data already seeded");
+      else toast.success("90 days of demo data seeded successfully");
     } catch (e: any) {
       toast.error(e.message ?? "Failed to seed data");
     } finally {
@@ -102,232 +117,220 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-lg" />)}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-lg" />)}
+          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
         </div>
       </div>
     );
   }
 
+  const stats = [
+    {
+      label: "Water", icon: Droplets, color: "#38BDF8",
+      value: tanks && tanks.length > 0 ? `${tanks[0].currentLevelPct}%` : "—",
+      sub: tanks && tanks.length > 0 ? tanks[0].name : "No tanks",
+      href: "/dashboard/water",
+    },
+    {
+      label: "Diesel", icon: Zap, color: "#F59E0B",
+      value: dgPred && dgPred.length > 0 ? `${dgPred[0].levelPct}%` : "—",
+      sub: dgPred && dgPred.length > 0 ? `${dgPred[0].hoursRemaining}h remaining` : "No DG units",
+      href: "/dashboard/power",
+    },
+    {
+      label: "Gas", icon: Flame, color: "#34D399",
+      value: gasLatest ? `${gasLatest.pressurePSI}` : "—",
+      sub: gasLatest ? "PSI" : "No readings",
+      href: "/dashboard/gas",
+    },
+    {
+      label: "Alerts", icon: AlertTriangle, color: criticalAlerts.length > 0 ? "#EF4444" : "#A855F7",
+      value: alerts?.length ?? 0,
+      sub: criticalAlerts.length > 0 ? `${criticalAlerts.length} critical` : "All clear",
+      href: "/dashboard/alerts",
+    },
+  ];
+
   return (
-    <div className="space-y-5 animate-count-up">
+    <div className="space-y-6">
+      {/* Critical alert banner */}
       {criticalAlerts.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-critical shrink-0" />
-            <span className="text-sm font-medium text-critical">
+        <motion.div
+          className="rounded-xl p-4 flex items-center justify-between"
+          style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)" }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+            <span className="text-sm font-medium text-red-300">
               {criticalAlerts.length} critical alert{criticalAlerts.length > 1 ? "s" : ""} — {criticalAlerts[0]?.title}
             </span>
           </div>
-          <Link href="/dashboard/alerts" className="text-xs font-medium text-critical hover:underline">View all →</Link>
-        </div>
+          <Link href="/dashboard/alerts" className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors">View all →</Link>
+        </motion.div>
       )}
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      {/* Health + seed button */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         {healthScore ? (
           <HealthGauge score={healthScore.score} grade={healthScore.grade} />
         ) : (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <motion.div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.4)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Sparkles className="h-4 w-4" />
             Society health will appear once data is logged.
-          </div>
+          </motion.div>
         )}
-        <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="shrink-0">
-          {seeding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-          Load demo data
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {societyId && blockId && (
+            <PdfReportButton societyId={societyId} blockId={blockId} societyName={profile?.name ?? "Society"} />
+          )}
+          <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10">
+            {seeding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+            Load demo data
+          </Button>
+        </div>
       </div>
 
+      {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/dashboard/water">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wide">Water</CardTitle>
-                <Droplets className="h-4 w-4" style={{ color: "#185FA5" }} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {tanks && tanks.length > 0 ? (
-                <>
-                  <p className="text-2xl font-bold" style={{ color: levelColor(tanks[0].currentLevelPct) }}>
-                    {tanks[0].currentLevelPct}%
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{tanks[0].name}</p>
-                  <Progress value={tanks[0].currentLevelPct} className="mt-2" indicatorColor={levelColor(tanks[0].currentLevelPct)} />
-                </>
-              ) : <p className="text-xs text-muted-foreground">No tanks</p>}
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/power">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wide">Diesel</CardTitle>
-                <Zap className="h-4 w-4" style={{ color: "#854F0B" }} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {dgPred && dgPred.length > 0 ? (
-                <>
-                  <p className="text-2xl font-bold" style={{ color: levelColor(dgPred[0].levelPct) }}>
-                    {dgPred[0].levelPct}%
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{dgPred[0].hoursRemaining}h remaining</p>
-                  <Progress value={dgPred[0].levelPct} className="mt-2" indicatorColor={levelColor(dgPred[0].levelPct)} />
-                </>
-              ) : <p className="text-xs text-muted-foreground">No DG units</p>}
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/gas">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wide">Gas</CardTitle>
-                <Flame className="h-4 w-4" style={{ color: "#0F6E56" }} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {gasLatest ? (
-                <>
-                  <p className="text-2xl font-bold">
-                    {gasLatest.pressurePSI} <span className="text-sm font-normal text-muted-foreground">PSI</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{formatDateTime(gasLatest.recordedAt)}</p>
-                </>
-              ) : <p className="text-xs text-muted-foreground">No readings</p>}
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/sewage">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground uppercase tracking-wide">Sewage</CardTitle>
-                <Wind className="h-4 w-4" style={{ color: "#993C1D" }} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {sewageLatest ? (
-                <>
-                  <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sewageLatest.stpStatus === "normal" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                    {sewageLatest.stpStatus === "normal" ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
-                    {sewageLatest.stpStatus}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1.5">Sludge: {sewageLatest.sludgeTankPct}%</p>
-                </>
-              ) : <p className="text-xs text-muted-foreground">No readings</p>}
-            </CardContent>
-          </Card>
-        </Link>
+        {stats.map(({ label, icon, color, value, sub, href }, i) => (
+          <Link key={label} href={href}>
+            <GlassStatCard label={label} value={value} sub={sub} icon={icon} color={color} index={i} />
+          </Link>
+        ))}
       </div>
 
+      {/* Detail cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Droplets className="h-4 w-4" style={{ color: "#185FA5" }} />
-                Water outlook
-              </CardTitle>
-              <Link href="/dashboard/water" className="text-xs text-primary hover:underline">Details →</Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {waterPred ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Days until critical</p>
-                    <p className="text-2xl font-bold" style={{ color: waterPred.daysUntilCritical < 3 ? "#A32D2D" : waterPred.daysUntilCritical < 7 ? "#BA7517" : "#3B6D11" }}>
-                      {waterPred.daysUntilCritical}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Avg daily use</p>
-                    <p className="text-2xl font-bold">{waterPred.avgDailyConsumption} <span className="text-sm font-normal">KL</span></p>
-                  </div>
-                </div>
-                <div className="rounded-lg border p-3 flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-                  <p className="text-xs text-muted-foreground">Recommended order</p>
-                  <p className="text-xs font-semibold">{daysFromNow(waterPred.recommendedOrderDate)}</p>
-                </div>
+        <ScrollReveal delay={0.1}>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-sky-400" />
+                  Water outlook
+                </CardTitle>
+                <Link href="/dashboard/water" className="text-xs text-primary hover:underline">Details →</Link>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Add water readings to see predictions.</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {waterPred ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Days until critical", value: waterPred.daysUntilCritical, color: waterPred.daysUntilCritical < 3 ? "#EF4444" : waterPred.daysUntilCritical < 7 ? "#F59E0B" : "#34D399" },
+                      { label: "Avg daily use", value: `${waterPred.avgDailyConsumption} KL`, color: "#A855F7" },
+                    ].map(({ label, value, color }) => (
+                      <div key={label} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
+                        <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</p>
+                        <p className="text-2xl font-bold" style={{ color }}>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rounded-xl p-3 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.04)" }}>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Recommended order</p>
+                    <p className="text-xs font-semibold text-white">{daysFromNow(waterPred.recommendedOrderDate)}</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Add water readings to see predictions.</p>
+              )}
+            </CardContent>
+          </Card>
+        </ScrollReveal>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                Active alerts
-                {alerts && alerts.length > 0 && (
-                  <Badge variant={criticalAlerts.length > 0 ? "critical" : "warning"} className="ml-1">{alerts.length}</Badge>
-                )}
-              </CardTitle>
-              <Link href="/dashboard/alerts" className="text-xs text-primary hover:underline">View all →</Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {!alerts || alerts.length === 0 ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
-                All clear — no active alerts
+        <ScrollReveal delay={0.15}>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                  Active alerts
+                  {alerts && alerts.length > 0 && (
+                    <Badge variant={criticalAlerts.length > 0 ? "critical" : "warning"} className="ml-1">{alerts.length}</Badge>
+                  )}
+                </CardTitle>
+                <Link href="/dashboard/alerts" className="text-xs text-primary hover:underline">View all →</Link>
               </div>
-            ) : (
-              <ul className="space-y-2">
-                {alerts.slice(0, 4).map(alert => (
-                  <li key={alert._id} className="flex items-start gap-2 text-sm">
-                    <div className={`mt-0.5 w-1.5 h-1.5 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-critical" : alert.severity === "warning" ? "bg-warning" : "bg-blue-500"}`} />
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{alert.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDateTime(alert.triggeredAt)}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {!alerts || alerts.length === 0 ? (
+                <div className="flex items-center gap-2 text-sm py-2" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  All clear — no active alerts
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {alerts.slice(0, 4).map((alert, i) => (
+                    <motion.li
+                      key={alert._id}
+                      className="flex items-start gap-3 p-2 rounded-lg transition-colors hover:bg-white/5"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                    >
+                      <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-400" : alert.severity === "warning" ? "bg-yellow-400" : "bg-blue-400"}`} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{alert.title}</p>
+                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{formatDateTime(alert.triggeredAt)}</p>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </ScrollReveal>
       </div>
 
+      {/* Health score breakdown */}
       {healthScore && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Health score breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { label: "Water level", value: healthScore.breakdown.water, max: 40 },
-                { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30 },
-                { label: "Waste segregation", value: healthScore.breakdown.waste, max: 30 },
-              ].map(({ label, value, max }) => (
-                <div key={label}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">{label}</span>
-                    <span className="font-medium">{value}/{max}</span>
-                  </div>
-                  <Progress value={(value / max) * 100} className="h-1.5" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ScrollReveal delay={0.2}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Health score breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-6">
+                {[
+                  { label: "Water level", value: healthScore.breakdown.water, max: 40, color: "#38BDF8" },
+                  { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30, color: "#A855F7" },
+                  { label: "Waste segregation", value: healthScore.breakdown.waste, max: 30, color: "#34D399" },
+                ].map(({ label, value, max, color }, i) => (
+                  <motion.div key={label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+                    <div className="flex justify-between text-xs mb-2">
+                      <span style={{ color: "rgba(255,255,255,0.5)" }}>{label}</span>
+                      <span className="font-semibold text-white">{value}/{max}</span>
+                    </div>
+                    <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: color, boxShadow: `0 0 8px ${color}60` }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(value / max) * 100}%` }}
+                        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 + i * 0.1 }}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardPageInner />
+    </Suspense>
   );
 }

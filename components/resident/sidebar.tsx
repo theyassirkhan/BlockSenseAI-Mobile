@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Droplets, CreditCard, ClipboardList,
-  Bell, User, ChevronLeft, X,
+  Bell, User, ChevronLeft, X, UserPlus, Car, MessageSquareWarning,
 } from "lucide-react";
 
 const NAV = [
   { href: "/resident", label: "Home", icon: LayoutDashboard },
   { href: "/resident/utilities", label: "Utilities", icon: Droplets },
   { href: "/resident/payments", label: "Payments", icon: CreditCard },
+  { href: "/resident/visitors", label: "Visitors", icon: UserPlus },
+  { href: "/resident/vehicles", label: "Vehicles", icon: Car },
+  { href: "/resident/complaints", label: "Complaints", icon: MessageSquareWarning },
   { href: "/resident/requests", label: "Requests", icon: ClipboardList },
   { href: "/resident/notices", label: "Notices", icon: Bell },
   { href: "/resident/profile", label: "Profile", icon: User },
@@ -39,7 +42,7 @@ export function ResidentSidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
       <aside
         className={cn(
-          "h-screen flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
+          "h-dvh flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
           "fixed inset-y-0 left-0 z-40 w-64",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:translate-x-0",

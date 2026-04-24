@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Loader2, ShieldCheck, Users, Home, Zap, BarChart3, Shield } from "lucide-react";
+import { Loader2, ShieldCheck, Users, Home, Zap, BarChart3, Shield, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 
 const DEMO_ROLES = [
-  { role: "admin" as const, label: "Admin", desc: "Full access", icon: ShieldCheck, color: "#A855F7", glow: "rgba(168,85,247,0.25)" },
-  { role: "rwa" as const, label: "RWA Manager", desc: "Manage & approve", icon: Users, color: "#38BDF8", glow: "rgba(56,189,248,0.25)" },
-  { role: "resident" as const, label: "Resident", desc: "View & report", icon: Home, color: "#34D399", glow: "rgba(52,211,153,0.25)" },
+  { role: "admin" as const,    label: "Admin",          desc: "Full platform access", icon: ShieldCheck, color: "#A855F7", glow: "rgba(168,85,247,0.25)" },
+  { role: "rwa" as const,      label: "RWA Manager",    desc: "Manage & approve",     icon: Users,       color: "#38BDF8", glow: "rgba(56,189,248,0.25)" },
+  { role: "resident" as const, label: "Resident",       desc: "View & report",        icon: Home,        color: "#34D399", glow: "rgba(52,211,153,0.25)" },
+  { role: "guard" as const,    label: "Security Guard", desc: "Gate & visitor log",   icon: ShieldAlert, color: "#F97316", glow: "rgba(249,115,22,0.25)" },
 ];
 
 const FEATURES = [
@@ -162,7 +163,7 @@ export default function LoginPage() {
     if (text.length === 6) { setOtp(text.split("")); inputRefs.current[5]?.focus(); }
   }
 
-  async function demoLogin(role: "admin" | "rwa" | "resident") {
+  async function demoLogin(role: "admin" | "rwa" | "resident" | "guard") {
     setDemoLoading(role);
     try {
       const data = await callAuth({ provider: "anonymous" });

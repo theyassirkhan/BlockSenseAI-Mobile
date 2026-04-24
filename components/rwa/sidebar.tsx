@@ -7,6 +7,7 @@ import {
   Droplets, Zap, Flame, Wind, Trash2, Truck, Users2,
   BellRing, BarChart3, Settings, LayoutDashboard, ChevronLeft,
   Building2, Wrench, CreditCard, Megaphone, TicketCheck, ClipboardList, X,
+  MessageSquareWarning,
 } from "lucide-react";
 
 const NAV = [
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/dashboard/service-requests", label: "Requests", icon: ClipboardList },
   { href: "/dashboard/tickets", label: "Tickets", icon: TicketCheck },
   { href: "/dashboard/broadcasts", label: "Broadcasts", icon: Megaphone },
+  { href: "/dashboard/complaints", label: "Complaints", icon: MessageSquareWarning, color: "#F97316" },
   { href: "/dashboard/alerts", label: "Alerts", icon: BellRing },
   { href: "/dashboard/water", label: "Water", icon: Droplets, color: "#185FA5" },
   { href: "/dashboard/power", label: "Power", icon: Zap, color: "#854F0B" },
@@ -51,7 +53,7 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
 
       <aside
         className={cn(
-          "h-screen flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
+          "h-dvh flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
           "fixed inset-y-0 left-0 z-40 w-64",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:translate-x-0",

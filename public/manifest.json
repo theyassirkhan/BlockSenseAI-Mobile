@@ -1,12 +1,12 @@
 {
-  "name": "BlockSense Mobile",
+  "name": "BlockSense AI",
   "short_name": "BlockSense",
-  "description": "Smart community operating system — mobile",
+  "description": "Smart community operating system — web & mobile",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F6F5F1",
-  "theme_color": "#0F6E56",
+  "background_color": "#0a0a0c",
+  "theme_color": "#A855F7",
   "categories": ["productivity", "utilities"],
   "icons": [
     { "src": "/icons/icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
