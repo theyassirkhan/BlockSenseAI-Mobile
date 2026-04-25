@@ -60,13 +60,22 @@ export default function VisitorsPage() {
     }
     setSaving(true);
     try {
-      await register({
+      const result = await register({
         societyId: societyId as any,
         visitorName: form.visitorName,
         visitorPhone: form.visitorPhone,
         expectedAt: new Date(form.expectedAt).getTime(),
       });
-      toast.success("Gate pass sent to guest via WhatsApp & SMS!");
+
+      // Auto-send the gate pass to the visitor via WhatsApp
+      sharePass({
+        passCode: result?.passCode ?? "",
+        visitorName: form.visitorName,
+        visitorPhone: form.visitorPhone,
+        expectedAt: new Date(form.expectedAt).getTime(),
+      });
+
+      toast.success("Gate pass sent to guest via WhatsApp!");
       setForm({ visitorName: "", visitorPhone: "", expectedAt: "" });
       setShowForm(false);
     } catch (e: any) {
