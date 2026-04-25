@@ -68,15 +68,18 @@ export const setupDemoUser = mutation({
       .withIndex("by_token", (q) => q.eq("tokenIdentifier", authId as string))
       .first();
 
-    // Pick a name seeded from the authId so the same session always gets the same name
-    const seed = (authId as string).charCodeAt(0) + (authId as string).charCodeAt(1);
-    const ADMIN_NAMES = ["Rajesh Srinivasan", "Anand Mehta", "Vikram Bhatia", "Suresh Agarwal", "Karthik Nair", "Deepak Pillai", "Manohar Joshi", "Arvind Kumar"];
-    const RWA_NAMES = ["Arun Sharma", "Prakash Bapat", "Milind Joshi", "Soumitra Dutta", "Venkatesh Reddy", "Anil Kapoor", "Subramaniam Pillai"];
-    const RESIDENT_NAMES = ["Priya Menon", "Kavitha Reddy", "Sunita Krishnan", "Rekha Nair", "Deepa Sharma", "Meena Iyer", "Usha Rani", "Ananya Chakraborty"];
-    const GUARD_NAMES = ["Ramesh Kumar", "Abdul Kalam", "Santhosh P", "Mohan Das", "Raju S", "Sundar V", "Bharat K"];
-    const PHONE_PREFIXES = ["98450", "98451", "98452", "98453", "98454", "97310", "97311", "97312"];
-    const phoneBase = PHONE_PREFIXES[seed % PHONE_PREFIXES.length] + String(10000 + (seed * 137) % 90000).slice(0, 5);
-    const phone = `+91${phoneBase}`;
+    // Derive a unique seed from the full authId string
+    const idStr = authId as string;
+    let seed = 0;
+    for (let i = 0; i < idStr.length; i++) seed = (seed * 31 + idStr.charCodeAt(i)) >>> 0;
+
+    const ADMIN_NAMES = ["Rajesh Srinivasan", "Anand Mehta", "Vikram Bhatia", "Suresh Agarwal", "Karthik Nair", "Deepak Pillai", "Manohar Joshi", "Arvind Kumar", "Harish Reddy", "Girish Kamath", "Sanjay Patel", "Ravi Menon", "Pradeep Hegde", "Naresh Jain", "Vinod Tiwari", "Ashwin Kumar"];
+    const RWA_NAMES = ["Prakash Bapat", "Milind Joshi", "Soumitra Dutta", "Venkatesh Reddy", "Anil Kapoor", "Subramaniam Pillai", "Rajan Nair", "Divakar Rao", "Mahesh Iyer", "Santosh Verma", "Ajit Desai", "Ramakrishnan S", "Nagarajan T", "Satish Kulkarni", "Mohandas K", "Kishore Bose"];
+    const RESIDENT_NAMES = ["Kavitha Reddy", "Sunita Krishnan", "Rekha Nair", "Deepa Sharma", "Meena Iyer", "Usha Rani", "Ananya Chakraborty", "Latha Venkat", "Parvathi Nair", "Sudha Murthy", "Archana Singh", "Bindu Rao", "Chitra Pillai", "Divya Mohan", "Esha Joshi", "Farah Khan", "Gayathri S", "Hema Malini R", "Indira Patel", "Jyothi Kumar"];
+    const GUARD_NAMES = ["Abdul Kalam", "Santhosh P", "Mohan Das", "Raju S", "Sundar V", "Bharat K", "Dinesh T", "Eshwar M", "Feroz Khan", "Govind Rao", "Hanumaiah B", "Imran Shaikh", "Jagadish N", "Karim M", "Lakshmaiah P"];
+    const PHONE_PREFIXES = ["9845", "9844", "9886", "9880", "9741", "9731", "9738", "9739", "9972", "9964", "9900", "9901", "9902", "8861", "8867", "7676", "7022", "6360"];
+    const phoneSuffix = String(seed % 1000000).padStart(6, "0");
+    const phone = `+91${PHONE_PREFIXES[seed % PHONE_PREFIXES.length]}${phoneSuffix}`;
     const roleNameMap = {
       admin: ADMIN_NAMES[seed % ADMIN_NAMES.length],
       rwa: RWA_NAMES[seed % RWA_NAMES.length],
@@ -1137,11 +1140,23 @@ export const seedExtraSocieties = mutation({
 export const wipeDemoNamedUsers = mutation({
   args: {},
   handler: async (ctx) => {
-    const DEMO_NAMES = ["Demo Admin", "Demo RWA Manager", "Demo Resident", "Demo Guard", "Demo Staff"];
+    // Delete ALL anonymous demo session users: no email, no onboardingComplete,
+    // created via the demo login button. Keep only real seeded residents (have email).
     const all = await ctx.db.query("users").collect();
     let deleted = 0;
+    // Group by name to find duplicates
+    const byName: Record<string, typeof all> = {};
     for (const u of all) {
-      if (u.name && DEMO_NAMES.some(d => u.name!.startsWith(d))) {
+      if (!u.name) continue;
+      byName[u.name] = byName[u.name] ?? [];
+      byName[u.name].push(u);
+    }
+    for (const u of all) {
+      const isDemoSession =
+        !u.email &&                          // real seeded residents always have email
+        !u.onboardingComplete &&             // real residents have this set true
+        (u.isAnonymous === true || !u.email);
+      if (isDemoSession) {
         await ctx.db.delete(u._id);
         deleted++;
       }
