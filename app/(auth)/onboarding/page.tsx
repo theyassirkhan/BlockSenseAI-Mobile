@@ -65,6 +65,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
 
   // Collected data
+  const [isDemo, setIsDemo] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<Role | null>(null);
@@ -72,6 +73,30 @@ export default function OnboardingPage() {
   const [societyId, setSocietyId] = useState<Id<"societies"> | null>(null);
   const [blockId, setBlockId] = useState<Id<"blocks"> | null>(null);
   const [flatNumber, setFlatNumber] = useState("");
+
+  // Pre-fill for demo mode
+  useEffect(() => {
+    const demoRole = sessionStorage.getItem("demoRole") as Role | null;
+    if (!demoRole) return;
+    setIsDemo(true);
+    const DEMO_DATA: Record<Role, { name: string; phone: string; socName?: string; socCity?: string; socAddress?: string; blockName?: string; flatNumber?: string }> = {
+      admin:    { name: "Rajesh Verma",  phone: "+91 98765 43210", socName: "Sunrise Valley Residency", socCity: "Bangalore", socAddress: "Hennur Road, Bangalore", blockName: "Block A" },
+      rwa:      { name: "Priya Nair",    phone: "+91 87654 32109" },
+      resident: { name: "Amit Sharma",   phone: "+91 76543 21098", flatNumber: "B-302" },
+      guard:    { name: "Suresh Kumar",  phone: "+91 65432 10987" },
+    };
+    const data = DEMO_DATA[demoRole];
+    if (!data) return;
+    setName(data.name);
+    setPhone(data.phone);
+    setRole(demoRole);
+    if (data.socName) setSocName(data.socName);
+    if (data.socCity) setSocCity(data.socCity);
+    if (data.socAddress) setSocAddress(data.socAddress);
+    if (data.blockName) setBlockName(data.blockName);
+    if (data.flatNumber) setFlatNumber(data.flatNumber);
+    if (demoRole !== "admin") { setIntent("join"); setSearch("Bangalore"); }
+  }, []);
 
   // Pre-fill from invite
   useEffect(() => {
@@ -146,6 +171,7 @@ export default function OnboardingPage() {
         sessionStorage.removeItem("inviteData");
       }
 
+      sessionStorage.removeItem("demoRole");
       toast.success("Welcome to BlockSense!");
 
       if (role === "admin") router.replace("/admin");
@@ -215,6 +241,19 @@ export default function OnboardingPage() {
           </div>
           <span className="font-bold text-white text-lg">BlockSense</span>
         </div>
+
+        {/* Demo banner */}
+        {isDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
+            style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)", color: "#C084FC" }}
+          >
+            <span>⚡</span>
+            <span>Demo Mode — fields are pre-filled with sample data. Edit anything before continuing.</span>
+          </motion.div>
+        )}
 
         {/* Progress */}
         <ProgressBar step={step} total={totalSteps} />

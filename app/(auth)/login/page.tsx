@@ -173,7 +173,8 @@ function LoginPageInner() {
     try {
       const result = await signIn("anonymous");
       if (result.signingIn) {
-        window.location.href = `/?setup=${role}`;
+        sessionStorage.setItem("demoRole", role);
+        window.location.href = `/onboarding`;
       } else {
         throw new Error("Demo login failed");
       }
