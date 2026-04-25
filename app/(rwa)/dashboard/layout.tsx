@@ -16,10 +16,15 @@ export default function RwaDashboardLayout({ children }: { children: React.React
   const router = useRouter();
 
   useEffect(() => {
-    if (profile?.role === "admin" || profile?.role === "platform_admin") {
-      router.replace("/admin");
-    }
-  }, [profile?.role]);
+    if (profile === undefined) return;
+    if (profile === null || !profile.onboardingComplete) { router.replace("/onboarding"); return; }
+    if (profile.role === "admin" || profile.role === "platform_admin") { router.replace("/admin"); return; }
+    if (profile.role === "resident" || profile.role === "staff") { router.replace("/resident"); return; }
+    if (profile.role === "guard") { router.replace("/guard"); return; }
+  }, [profile]);
+
+  if (profile === undefined) return null;
+  if (profile && profile.role !== "rwa" && profile.role !== "admin" && profile.role !== "platform_admin") return null;
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background relative">

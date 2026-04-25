@@ -12,7 +12,6 @@ import {
   Droplets, Zap, Flame, Wind, CreditCard,
   ClipboardList, Bell, CheckCircle2, AlertTriangle, Sparkles, Loader2,
 } from "lucide-react";
-import { AiChat } from "@/components/ui/ai-chat";
 import Link from "next/link";
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -175,17 +174,6 @@ function ResidentHomePageInner() {
             </CardContent>
           </Card>
         </ScrollReveal>
-      )}
-
-      {/* AI assistant FAB */}
-      {societyId && blockId && profile?.name && profile?.flatNumber && (
-        <AiChat
-          societyId={societyId}
-          blockId={blockId}
-          residentName={profile.name}
-          flatNumber={profile.flatNumber}
-          societyName={society?.name ?? "your society"}
-        />
       )}
 
       {/* Sewage status */}

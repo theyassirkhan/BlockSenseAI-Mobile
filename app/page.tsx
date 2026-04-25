@@ -42,7 +42,8 @@ function RootRedirect() {
       return;
     }
     if (profile === undefined) return;
-    if (profile === null || !profile.onboardingComplete) return; // stay on landing
+    if (profile === null) return; // unauthenticated — stay on landing
+    if (!profile.onboardingComplete) { router.replace("/onboarding"); return; }
     if (profile.role === "platform_admin" || profile.role === "admin") router.replace("/admin");
     else if (profile.role === "resident") router.replace("/resident");
     else if (profile.role === "guard") router.replace("/guard");

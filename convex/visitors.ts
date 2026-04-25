@@ -116,6 +116,7 @@ export const notifyResidentCheckIn = internalAction({
   args: {
     residentId: v.id("users"),
     visitorName: v.string(),
+    visitorPhone: v.string(),
     checkedInAt: v.number(),
   },
   handler: async (ctx, args) => {
@@ -137,13 +138,16 @@ export const notifyResidentCheckIn = internalAction({
 
     // Email fallback — always attempt if resident has email
     if (resident.email) {
+      const society = resident.societyId
+        ? await ctx.runQuery(internal.users.getById, { userId: resident.societyId as any }).catch(() => null)
+        : null;
       await ctx.runAction(internal.email.sendVisitorArrivalEmail, {
         residentEmail: resident.email,
         residentName: resident.name ?? "Resident",
         visitorName: args.visitorName,
-        visitorPhone: "",
+        visitorPhone: args.visitorPhone,
         flatNumber: resident.flatNumber ?? "",
-        societyName: "your society",
+        societyName: (society as any)?.name ?? "your society",
       }).catch(() => {});
     }
 
@@ -275,6 +279,7 @@ export const checkIn = mutation({
       await ctx.scheduler.runAfter(0, internal.visitors.notifyResidentCheckIn, {
         residentId: visitor.registeredBy,
         visitorName: visitor.visitorName,
+        visitorPhone: visitor.visitorPhone,
         checkedInAt: now,
       });
     }

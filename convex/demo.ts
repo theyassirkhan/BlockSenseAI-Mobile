@@ -1163,8 +1163,15 @@ export const wipeDemoNamedUsersInternal = internalMutation({
   handler: async (ctx) => {
     const all = await ctx.db.query("users").collect();
     let deleted = 0;
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
     for (const u of all) {
-      const isDemoSession = !u.email && !u.onboardingComplete;
+      // Only delete anonymous demo sessions: no email, no onboarding, AND created
+      // more than 24 hours ago (protects users in the middle of onboarding)
+      const isDemoSession =
+        !u.email &&
+        !u.onboardingComplete &&
+        u.isAnonymous === true &&
+        (u.createdAt ?? 0) < oneDayAgo;
       if (isDemoSession) {
         await ctx.db.delete(u._id);
         deleted++;

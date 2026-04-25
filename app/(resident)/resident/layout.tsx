@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { ResidentSidebar } from "@/components/resident/sidebar";
 import { ResidentHeader } from "@/components/resident/header";
@@ -15,6 +16,18 @@ export default function ResidentLayout({ children }: { children: React.ReactNode
   const [mobileOpen, setMobileOpen] = useState(false);
   const profile = useQuery(api.users.getMyProfile);
   const society = useQuery(api.societies.get, profile?.societyId ? { societyId: profile.societyId as Id<"societies"> } : "skip");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (profile === undefined) return;
+    if (profile === null || !profile.onboardingComplete) { router.replace("/onboarding"); return; }
+    if (profile.role === "admin" || profile.role === "platform_admin") { router.replace("/admin"); return; }
+    if (profile.role === "rwa") { router.replace("/dashboard"); return; }
+    if (profile.role === "guard") { router.replace("/guard"); return; }
+  }, [profile]);
+
+  if (profile === undefined) return null;
+  if (profile && profile.role !== "resident" && profile.role !== "staff") return null;
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background relative">

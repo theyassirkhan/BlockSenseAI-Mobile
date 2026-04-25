@@ -6,6 +6,8 @@ import {
 
 const isPublicRoute = createRouteMatcher([
   "/login(.*)",
+  "/logout",
+  "/join(.*)",
   "/onboarding(.*)",
   "/role-select(.*)",
   "/api/auth(.*)",
