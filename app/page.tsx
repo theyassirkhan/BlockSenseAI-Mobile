@@ -57,8 +57,9 @@ export default function LandingPage() {
   const [hoveredDemo, setHoveredDemo] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen" style={{ background: "#050508", color: "#fff" }}>
+    <>
       <Suspense><RootRedirect /></Suspense>
+    <div className="min-h-screen" style={{ background: "#050508", color: "#fff" }}>
 
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -94,7 +95,7 @@ export default function LandingPage() {
             <Sparkles className="h-3 w-3" /> AI-powered society management
           </div>
           <h1 className="text-5xl sm:text-6xl font-black leading-tight mb-6"
-            style={{ background: "linear-gradient(135deg,#fff 40%,#A855F7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            style={{ background: "linear-gradient(135deg,#fff 40%,#A855F7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", transform: "translateZ(0)" }}>
             Your society,<br />intelligently managed
           </h1>
           <p className="text-lg max-w-2xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -122,7 +123,8 @@ export default function LandingPage() {
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
               className="p-5 rounded-2xl"
               style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}
@@ -180,5 +182,6 @@ export default function LandingPage() {
         </p>
       </footer>
     </div>
+    </>
   );
 }
