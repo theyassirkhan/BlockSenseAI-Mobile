@@ -71,8 +71,16 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
         context: buildContext(),
       });
       setMessages(prev => [...prev, { role: "ai", text: res.reply, ts: Date.now() }]);
-    } catch {
-      setMessages(prev => [...prev, { role: "ai", text: "Sorry, I couldn't process that. Please try again.", ts: Date.now() }]);
+    } catch (err) {
+      console.error("[AiChat] residentChat failed:", err);
+      const isConfig = err instanceof Error && err.message.includes("GOOGLE_AI_API_KEY");
+      setMessages(prev => [...prev, {
+        role: "ai",
+        text: isConfig
+          ? "AI assistant is not configured yet. Please contact your society admin."
+          : "Sorry, something went wrong. Please try again in a moment.",
+        ts: Date.now(),
+      }]);
     } finally {
       setLoading(false);
     }

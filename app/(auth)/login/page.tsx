@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Users, Home, Zap, BarChart3, Shield, ShieldAlert } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -81,7 +82,7 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
   );
 }
 
-export default function LoginPage() {
+function LoginPageInner() {
   const { signIn, signOut } = useAuthActions();
   const sendOTP = useAction(api.otp.sendOTP);
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -92,7 +93,18 @@ export default function LoginPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => { signOut().catch(() => {}); }, []);
+  const searchParams = useSearchParams();
+  const autoDemo = searchParams.get("demo") as "admin" | "rwa" | "resident" | "guard" | null;
+  const autoDemoTriggered = useRef(false);
+
+  useEffect(() => {
+    signOut().catch(() => {}).finally(() => {
+      if (autoDemo && !autoDemoTriggered.current) {
+        autoDemoTriggered.current = true;
+        demoLogin(autoDemo);
+      }
+    });
+  }, []);
 
   async function onEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -411,3 +423,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() { return <Suspense><LoginPageInner /></Suspense>; }

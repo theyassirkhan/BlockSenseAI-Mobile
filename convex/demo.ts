@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -1144,18 +1144,27 @@ export const wipeDemoNamedUsers = mutation({
     // created via the demo login button. Keep only real seeded residents (have email).
     const all = await ctx.db.query("users").collect();
     let deleted = 0;
-    // Group by name to find duplicates
-    const byName: Record<string, typeof all> = {};
-    for (const u of all) {
-      if (!u.name) continue;
-      byName[u.name] = byName[u.name] ?? [];
-      byName[u.name].push(u);
-    }
     for (const u of all) {
       const isDemoSession =
-        !u.email &&                          // real seeded residents always have email
-        !u.onboardingComplete &&             // real residents have this set true
+        !u.email &&
+        !u.onboardingComplete &&
         (u.isAnonymous === true || !u.email);
+      if (isDemoSession) {
+        await ctx.db.delete(u._id);
+        deleted++;
+      }
+    }
+    return { deleted };
+  },
+});
+
+export const wipeDemoNamedUsersInternal = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("users").collect();
+    let deleted = 0;
+    for (const u of all) {
+      const isDemoSession = !u.email && !u.onboardingComplete;
       if (isDemoSession) {
         await ctx.db.delete(u._id);
         deleted++;
