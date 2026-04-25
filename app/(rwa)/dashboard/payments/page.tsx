@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Settings2 } from "lucide-react";
+import { CreditCard, Settings2, ExternalLink, MessageCircle, TrendingUp, Zap } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/utils";
 import { Id } from "@/convex/_generated/dataModel";
@@ -33,6 +34,7 @@ export default function PaymentsPage() {
   const societyId = profile?.societyId;
 
   const summary = useQuery(api.payments.getSummary, societyId ? { societyId } : "skip");
+  const monthlyRevenue = useQuery((api as any).payments.getMonthlyRevenue, societyId ? { societyId } : "skip");
   const payments = useQuery(api.payments.getBySociety, societyId ? { societyId } : "skip");
   const charges = useQuery(api.payments.getMaintenanceCharges, societyId ? { societyId } : "skip");
   const setCharge = useMutation(api.payments.setMaintenanceCharge);
@@ -41,6 +43,13 @@ export default function PaymentsPage() {
   const [showChargeForm, setShowChargeForm] = useState(false);
   const [chargeForm, setChargeForm] = useState({ flatType: "standard", monthlyAmount: "", dueDay: "5" });
   const [filterStatus, setFilterStatus] = useState("all");
+  const WA_NUMBER = "919739121146";
+
+  function buildWaReminder(residentName: string, flatNumber: string, description: string, amount: number, phone?: string) {
+    const msg = `Dear ${residentName || "Resident"} (Flat ${flatNumber || ""}), this is a reminder that ₹${amount.toLocaleString("en-IN")} for ${description} is due. Please pay at the earliest to avoid late fees. — Society Management`;
+    const num = phone ? phone.replace(/\D/g, "").replace(/^0/, "91") : WA_NUMBER;
+    return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  }
 
   const filtered = (payments ?? []).filter(p =>
     filterStatus === "all" || p.status === filterStatus
@@ -80,13 +89,13 @@ export default function PaymentsPage() {
           <CreditCard className="h-5 w-5" />
           Payments
         </h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => setShowChargeForm(true)}>
             <Settings2 className="mr-1.5 h-3.5 w-3.5" />
             Set charges
           </Button>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-32 sm:w-36 h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All status</SelectItem>
               <SelectItem value="confirmed">Paid</SelectItem>
@@ -116,11 +125,37 @@ export default function PaymentsPage() {
         </div>
       )}
 
+      {/* Revenue chart */}
+      {monthlyRevenue && monthlyRevenue.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-emerald-400" />
+              Revenue (last 6 months)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={monthlyRevenue} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} />
+                <Tooltip
+                  contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => [`₹${v.toLocaleString("en-IN")}`, "Collected"]}
+                />
+                <Bar dataKey="amount" fill="#34D399" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {showChargeForm && (
         <Card>
           <CardHeader><CardTitle className="text-sm">Set Maintenance Charge</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label>Flat type</Label>
                 <Input value={chargeForm.flatType} onChange={e => setChargeForm({ ...chargeForm, flatType: e.target.value })} placeholder="standard / premium / studio" />
@@ -174,8 +209,8 @@ export default function PaymentsPage() {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                    <td className="px-4 py-3 font-medium max-w-[200px] truncate">{p.description}</td>
+                  <tr key={p._id} className="border-b hover:bg-muted/30 transition-colors" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                    <td className="px-4 py-3 font-medium max-w-[180px] truncate">{p.description}</td>
                     <td className="px-4 py-3">₹{p.amount.toLocaleString("en-IN")}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{formatDateTime(p.dueDate)}</td>
                     <td className="px-4 py-3">
@@ -187,11 +222,24 @@ export default function PaymentsPage() {
                       {p.paidAt ? formatDateTime(p.paidAt) : "—"}
                     </td>
                     <td className="px-4 py-3">
-                      {p.status === "pending_confirmation" && (
-                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleConfirm(p._id)}>
-                          Confirm
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {p.status === "pending_confirmation" && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleConfirm(p._id)}>
+                            Confirm
+                          </Button>
+                        )}
+                        {(p.status === "pending" || p.status === "overdue") && (
+                          <a
+                            href={buildWaReminder((p as any).residentName ?? "", (p as any).flatNumber ?? "", p.description, p.amount, (p as any).phone)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-green-400 hover:text-green-300"
+                            title="Send WhatsApp reminder"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

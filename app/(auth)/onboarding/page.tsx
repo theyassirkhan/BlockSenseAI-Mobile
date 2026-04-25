@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -73,11 +73,25 @@ export default function OnboardingPage() {
   const [blockId, setBlockId] = useState<Id<"blocks"> | null>(null);
   const [flatNumber, setFlatNumber] = useState("");
 
+  // Pre-fill from invite
+  useEffect(() => {
+    const raw = sessionStorage.getItem("inviteData");
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      if (data.role) setRole(data.role as Role);
+      if (data.flatNumber) setFlatNumber(data.flatNumber);
+      if (data.societyId) { setSocietyId(data.societyId); setIntent("join"); }
+      if (data.blockId) setBlockId(data.blockId);
+    } catch {}
+  }, []);
+
   const createProfile   = useMutation(api.users.createProfile);
   const createSociety   = useMutation(api.societies.create);
   const addBlock        = useMutation(api.societies.addBlock);
   const setActiveSociety = useMutation(api.users.setActiveSociety);
   const completeOnboarding = useMutation(api.users.completeOnboarding);
+  const consumeInvite = useMutation((api as any).invites.consume);
 
   // Society create form state
   const [socName, setSocName] = useState("");
@@ -123,6 +137,14 @@ export default function OnboardingPage() {
         societyId: societyId ?? undefined,
         blockId: blockId ?? undefined,
       });
+
+      // Consume invite token if present
+      const inviteToken = sessionStorage.getItem("inviteToken");
+      if (inviteToken) {
+        try { await consumeInvite({ token: inviteToken }); } catch {}
+        sessionStorage.removeItem("inviteToken");
+        sessionStorage.removeItem("inviteData");
+      }
 
       toast.success("Welcome to BlockSense!");
 

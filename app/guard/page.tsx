@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Shield, UserPlus, Search, LogOut, LogIn, Camera, CheckCircle2, Clock, Loader2, History, VideoOff } from "lucide-react";
+import { Shield, UserPlus, Search, LogOut, LogIn, Camera, CheckCircle2, Clock, Loader2, History, VideoOff, BarChart2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,9 +66,9 @@ function GuardPageInner() {
 }
 
 function GuardDashboard({ societyId }: { societyId: any }) {
-  const [tab, setTab] = useState<"log" | "walkin" | "scan" | "history">("log");
+  const [tab, setTab] = useState<"log" | "walkin" | "scan" | "history" | "stats">("log");
   const todayLog = useQuery(api.visitors.getTodayLog, { societyId });
-  const history = useQuery(api.visitors.getHistory, tab === "history" ? { societyId, limit: 50 } : "skip");
+  const history = useQuery(api.visitors.getHistory, (tab === "history" || tab === "stats") ? { societyId, limit: 200 } : "skip");
   const checkIn = useMutation(api.visitors.checkIn);
   const checkOut = useMutation(api.visitors.checkOut);
 
@@ -89,13 +89,13 @@ function GuardDashboard({ societyId }: { societyId: any }) {
       </div>
 
       <div className="flex border-b border-gray-800 bg-gray-900 overflow-x-auto">
-        {(["log", "walkin", "scan", "history"] as const).map(t => (
+        {(["log", "walkin", "scan", "history", "stats"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 min-w-[72px] py-3 text-xs font-medium transition-colors whitespace-nowrap px-2 ${tab === t ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-500 hover:text-gray-300"}`}
+            className={`flex-1 min-w-[64px] py-3 text-xs font-medium transition-colors whitespace-nowrap px-2 ${tab === t ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-500 hover:text-gray-300"}`}
           >
-            {t === "log" ? "Today's Log" : t === "walkin" ? "Walk-in" : t === "scan" ? "Scan Pass" : "History"}
+            {t === "log" ? "Today" : t === "walkin" ? "Walk-in" : t === "scan" ? "Scan" : t === "history" ? "History" : "Stats"}
           </button>
         ))}
       </div>
@@ -107,6 +107,7 @@ function GuardDashboard({ societyId }: { societyId: any }) {
         {tab === "walkin" && <WalkInForm societyId={societyId} onDone={() => setTab("log")} />}
         {tab === "scan" && <ScanPass societyId={societyId} onCheckIn={checkIn} />}
         {tab === "history" && <HistoryLog visitors={history ?? []} loading={history === undefined} />}
+        {tab === "stats" && <VisitorStats visitors={history ?? []} loading={history === undefined} />}
       </div>
     </div>
   );
@@ -424,6 +425,94 @@ function ScanPass({ societyId, onCheckIn }: { societyId: any; onCheckIn: any }) 
               )}
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VisitorStats({ visitors, loading }: { visitors: any[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-gray-500">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+        <span className="text-sm">Loading stats…</span>
+      </div>
+    );
+  }
+
+  const today = new Date();
+  const dayStats: { label: string; count: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const dayEnd = dayStart + 86400000;
+    const label = i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short" });
+    const count = visitors.filter(v => v.createdAt >= dayStart && v.createdAt < dayEnd).length;
+    dayStats.push({ label, count });
+  }
+
+  const checkedOut = visitors.filter(v => v.checkedOutAt).length;
+  const avgDuration = checkedOut > 0
+    ? Math.round(visitors.filter(v => v.checkedOutAt).reduce((s, v) => s + (v.checkedOutAt - v.checkedInAt) / 60000, 0) / checkedOut)
+    : null;
+
+  const purposeMap: Record<string, number> = {};
+  visitors.forEach(v => {
+    const key = v.purposeFlat ? `Flat ${v.purposeFlat}` : "—";
+    purposeMap[key] = (purposeMap[key] ?? 0) + 1;
+  });
+  const topFlats = Object.entries(purposeMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxCount = Math.max(...dayStats.map(d => d.count), 1);
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Total logged", value: visitors.length },
+          { label: "Checked out", value: checkedOut },
+          { label: "Avg visit (min)", value: avgDuration != null ? avgDuration : "—" },
+        ].map(s => (
+          <div key={s.label} className="bg-gray-900 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-white">{s.value}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-gray-900 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-400 mb-3 flex items-center gap-1.5">
+          <BarChart2 className="h-3.5 w-3.5" /> Last 7 days
+        </p>
+        <div className="flex items-end gap-1.5 h-20">
+          {dayStats.map(d => (
+            <div key={d.label} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[9px] text-gray-500">{d.count || ""}</span>
+              <div
+                className="w-full rounded-t-sm bg-blue-500/70"
+                style={{ height: `${(d.count / maxCount) * 52}px`, minHeight: d.count > 0 ? 4 : 0 }}
+              />
+              <span className="text-[9px] text-gray-500">{d.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {topFlats.length > 0 && (
+        <div className="bg-gray-900 rounded-xl p-4">
+          <p className="text-xs font-semibold text-gray-400 mb-3">Most visited flats</p>
+          <ul className="space-y-2">
+            {topFlats.map(([flat, count]) => (
+              <li key={flat} className="flex items-center justify-between text-sm">
+                <span className="text-gray-300">{flat}</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 bg-blue-500/50 rounded-full" style={{ width: `${(count / topFlats[0][1]) * 60}px` }} />
+                  <span className="text-gray-500 text-xs w-4 text-right">{count}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
