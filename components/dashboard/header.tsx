@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useActiveBlock } from "@/hooks/use-active-block";
+import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { BellRing, ChevronDown, LogOut, Settings, Menu } from "lucide-react";
+import { BellRing, ChevronDown, LogOut, Settings, User, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
@@ -47,13 +48,10 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
   const criticalCount = alerts?.filter(a => a.severity === "critical").length ?? 0;
 
   return (
-    <header className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass relative z-10" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+    <header className="h-14 flex items-center justify-between px-4 shrink-0 header-glass sticky top-0 z-20">
+      {/* Society name */}
       <div className="flex items-center gap-2 min-w-0">
-        <button
-          onClick={onMenuOpen}
-          className="p-1.5 rounded-md hover:bg-white/10 active:bg-white/20 transition-colors md:hidden shrink-0"
-          aria-label="Open menu"
-        >
+        <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 active:bg-white/20 transition-colors md:hidden shrink-0" aria-label="Open menu">
           <Menu className="h-5 w-5 text-white/70" />
         </button>
         <span className="text-sm font-semibold text-foreground truncate">{society?.name ?? "BlockSense"}</span>
@@ -68,7 +66,7 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
               onClick={() => setBlockOpen(p => !p)}
               aria-expanded={blockOpen}
               aria-haspopup="listbox"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-sm font-medium hover:bg-accent active:bg-accent/70 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-sm font-medium hover:bg-accent transition-colors"
               style={{ borderColor: "rgba(255,255,255,0.09)" }}
             >
               <span className="max-w-[120px] truncate">{activeBlock?.name ?? "Select block"}</span>
@@ -77,8 +75,8 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
             {blockOpen && (
               <div
                 role="listbox"
-                className="absolute right-0 top-full mt-1 rounded-lg border shadow-2xl py-1 z-[9999] min-w-[160px]"
-                style={{ background: "hsl(240,8%,10%)", borderColor: "rgba(255,255,255,0.08)" }}
+                className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
+                style={{ borderColor: "rgba(255,255,255,0.08)" }}
               >
                 {blocks.map(b => (
                   <button
@@ -94,10 +92,10 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
                     {b.name}
                   </button>
                 ))}
-                <div className="border-t my-1" style={{ borderColor: "rgba(255,255,255,0.07)" }} />
+                <div className="border-t my-1" style={{ borderColor: "rgba(255,255,255,0.06)" }} />
                 <button
                   onClick={() => { router.push("/block-select"); setBlockOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-xs text-muted-foreground hover:bg-accent active:bg-accent/70 transition-colors"
+                  className="w-full text-left px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors"
                 >
                   All blocks →
                 </button>
@@ -112,7 +110,7 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
         <button
           onClick={() => router.push("/alerts")}
           aria-label={`${criticalCount} critical alerts`}
-          className="relative p-2 rounded-md hover:bg-accent active:bg-accent/70 transition-colors"
+          className="relative p-2 rounded-md hover:bg-accent transition-colors"
         >
           <BellRing className="h-4 w-4" />
           {criticalCount > 0 && (
@@ -126,7 +124,7 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
             onClick={() => setUserOpen(p => !p)}
             aria-expanded={userOpen}
             aria-haspopup="menu"
-            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent active:bg-accent/70 transition-colors"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
           >
             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
               {profile?.name?.[0]?.toUpperCase() ?? "?"}
@@ -136,24 +134,24 @@ export function Header({ societyId, onMenuOpen }: HeaderProps) {
           {userOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-1 rounded-lg border shadow-2xl py-1 z-[9999] min-w-[160px]"
-              style={{ background: "hsl(240,8%,10%)", borderColor: "rgba(255,255,255,0.08)" }}
+              className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
+              style={{ borderColor: "rgba(255,255,255,0.08)" }}
             >
-              <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+              <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 <p className="text-sm font-medium">{profile?.name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
               </div>
               <button
                 role="menuitem"
                 onClick={() => { router.push("/settings"); setUserOpen(false); }}
-                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-accent active:bg-accent/70 transition-colors"
+                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
               >
                 <Settings className="h-3.5 w-3.5" />Settings
               </button>
               <button
                 role="menuitem"
-                onClick={async () => { await signOut(); router.push("/login"); }}
-                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent active:bg-accent/70 transition-colors"
+                onClick={async () => { await signOut(); window.location.href = "/login"; }}
+                className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors"
               >
                 <LogOut className="h-3.5 w-3.5" />Sign out
               </button>

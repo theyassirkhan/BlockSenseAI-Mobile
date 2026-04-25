@@ -28,8 +28,8 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
 
   return (
     <header
-      className="h-14 flex items-center justify-between px-3 sm:px-4 border-b bg-card shrink-0 header-glass relative z-10"
-      style={{ borderColor: "rgba(255,255,255,0.07)" }}
+      className="h-14 flex items-center justify-between px-4 shrink-0 header-glass sticky top-0 z-20"
+      style={{ borderColor: "rgba(255,255,255,0.06)" }}
     >
       <div className="flex items-center gap-2">
         <button onClick={onMenuOpen} className="p-1.5 rounded-md hover:bg-white/10 active:bg-white/20 transition-colors md:hidden shrink-0" aria-label="Open menu">
@@ -45,7 +45,7 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
         <button
           onClick={() => setUserOpen((p) => !p)}
           aria-expanded={userOpen}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent active:bg-accent/70 transition-colors"
+          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
         >
           <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
             {profile?.name?.[0]?.toUpperCase() ?? "A"}
@@ -58,17 +58,17 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
         {userOpen && (
           <div
             role="menu"
-            className="absolute right-0 top-full mt-1 rounded-lg border shadow-2xl py-1 z-[9999] min-w-[160px]"
-            style={{ background: "hsl(240,8%,10%)", borderColor: "rgba(255,255,255,0.08)" }}
+            className="absolute right-0 top-full mt-1 bg-card border rounded-lg shadow-lg py-1 z-50 min-w-[160px]"
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
           >
-            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            <div className="px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
               <p className="text-sm font-medium">{profile?.name}</p>
               <p className="text-xs text-primary font-semibold">Platform Admin</p>
             </div>
             <button
               role="menuitem"
-              onClick={async () => { await signOut(); router.push("/login"); }}
-              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent active:bg-accent/70 transition-colors"
+              onClick={async () => { await signOut(); window.location.href = "/login"; }}
+              className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>
