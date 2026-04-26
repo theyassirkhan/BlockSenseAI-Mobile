@@ -117,6 +117,29 @@ export default function OnboardingPage() {
   const setActiveSociety = useMutation(api.users.setActiveSociety);
   const completeOnboarding = useMutation(api.users.completeOnboarding);
   const consumeInvite = useMutation((api as any).invites.consume);
+  const setupDemoUser = useMutation(api.demo.setupDemoUser);
+
+  // Auto-complete onboarding for demo logins — skip all steps
+  useEffect(() => {
+    if (!isDemo || !role) return;
+    let cancelled = false;
+    async function runDemoSetup() {
+      try {
+        const { societyId: sid, blockId: bid } = await setupDemoUser({ role: role as "admin" | "rwa" | "resident" | "guard" });
+        await completeOnboarding({ societyId: sid, blockId: bid, whatsapp: "", whatsappVerified: false });
+        sessionStorage.removeItem("demoRole");
+        if (cancelled) return;
+        if (role === "admin") router.replace("/admin");
+        else if (role === "resident") router.replace("/resident");
+        else if (role === "guard") router.replace("/guard");
+        else router.replace("/dashboard");
+      } catch (e: any) {
+        toast.error(e.message ?? "Demo setup failed");
+      }
+    }
+    runDemoSetup();
+    return () => { cancelled = true; };
+  }, [isDemo, role]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Society create form state
   const [socName, setSocName] = useState("");
@@ -215,6 +238,17 @@ export default function OnboardingPage() {
     s.name.toLowerCase().includes(search.toLowerCase()) ||
     (s.city ?? "").toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isDemo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050508" }}>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+          <p className="text-gray-400 text-sm">Setting up your demo…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#050508" }}>
