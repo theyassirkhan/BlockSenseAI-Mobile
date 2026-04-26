@@ -129,10 +129,10 @@ export default function OnboardingPage() {
         await completeOnboarding({ societyId: sid, blockId: bid, whatsapp: "", whatsappVerified: false });
         sessionStorage.removeItem("demoRole");
         if (cancelled) return;
-        if (role === "admin") router.replace("/admin");
-        else if (role === "resident") router.replace("/resident");
-        else if (role === "guard") router.replace("/guard");
-        else router.replace("/dashboard");
+        if (role === "admin") router.replace(`/admin?setup=admin`);
+        else if (role === "resident") router.replace(`/resident?setup=resident`);
+        else if (role === "guard") router.replace(`/guard?setup=guard`);
+        else router.replace(`/dashboard?setup=rwa`);
       } catch (e: any) {
         toast.error(e.message ?? "Demo setup failed");
       }
