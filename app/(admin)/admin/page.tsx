@@ -26,6 +26,7 @@ export default function AdminPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setupDemoUser = useMutation(api.demo.setupDemoUser);
+  const seedAllDemoData = useMutation(api.demo.seedAllDemoData);
   const seedExtraSocieties = useMutation(api.demo.seedExtraSocieties);
   const setupDone = useRef(false);
   const [seeding, setSeeding] = useState(false);
@@ -35,7 +36,11 @@ export default function AdminPage() {
     const setup = searchParams.get("setup");
     if (!setup || setupDone.current) return;
     setupDone.current = true;
-    setupDemoUser({ role: "admin" }).then(() => router.replace("/admin")).catch(console.error);
+    setupDemoUser({ role: "admin" })
+      .then(() => seedAllDemoData({}))
+      .then(() => seedExtraSocieties({}))
+      .then(() => router.replace("/admin"))
+      .catch(console.error);
   }, [searchParams]);
 
   const societies = useQuery(api.societies_internal.listAll, {});
