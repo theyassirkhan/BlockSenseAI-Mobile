@@ -128,6 +128,7 @@ export default function OnboardingPage() {
         const { societyId: sid, blockId: bid } = await setupDemoUser({ role: role as "admin" | "rwa" | "resident" | "guard" });
         await completeOnboarding({ societyId: sid, blockId: bid, whatsapp: "", whatsappVerified: false });
         sessionStorage.removeItem("demoRole");
+        localStorage.removeItem("blocksense_active_block_id");
         if (cancelled) return;
         if (role === "admin") router.replace(`/admin?setup=admin`);
         else if (role === "resident") router.replace(`/resident?setup=resident`);
