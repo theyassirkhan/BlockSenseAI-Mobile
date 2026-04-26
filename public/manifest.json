@@ -1,26 +1,14 @@
 {
-  "name": "BlockSense AI",
+  "name": "BlockSense",
   "short_name": "BlockSense",
-  "description": "Smart community operating system — web & mobile",
+  "description": "Smart Community Operating System",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0a0a0c",
+  "background_color": "#0d0d1a",
   "theme_color": "#A855F7",
-  "categories": ["productivity", "utilities"],
   "icons": [
-    { "src": "/icons/icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-96.png",  "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Water",  "short_name": "Water",  "url": "/dashboard/water",  "icons": [{ "src": "/icons/shortcut-water.png",  "sizes": "96x96" }] },
-    { "name": "Power",  "short_name": "Power",  "url": "/dashboard/power",  "icons": [{ "src": "/icons/shortcut-power.png",  "sizes": "96x96" }] },
-    { "name": "Alerts", "short_name": "Alerts", "url": "/dashboard/alerts", "icons": [{ "src": "/icons/shortcut-alerts.png", "sizes": "96x96" }] }
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
