@@ -30,7 +30,7 @@ export function BottomTabBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around h-16">
+      <div className="flex items-center justify-around" style={{ height: 64 }}>
         {tabs.slice(0, 2).map((tab) => (
           <TabLink key={tab.href} tab={tab} active={pathname === tab.href || pathname.startsWith(tab.href + "/")} />
         ))}
@@ -38,7 +38,8 @@ export function BottomTabBar() {
         {/* FAB center button */}
         <Link
           href="/dashboard/actions"
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-[#0F6E56] text-white shadow-lg -mt-5 active:scale-95 transition-transform"
+          className="flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg -mt-5 active:scale-95 transition-transform"
+          style={{ background: "linear-gradient(135deg, #A855F7, #7C3AED)" }}
           aria-label="Quick actions"
         >
           <Plus size={26} strokeWidth={2.5} />
@@ -58,7 +59,7 @@ function TabLink({ tab, active }: { tab: TabItem; active: boolean }) {
       href={tab.href}
       className={cn(
         "flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-[44px] min-h-[44px] text-xs transition-colors",
-        active ? "text-[#0F6E56]" : "text-muted-foreground"
+        active ? "text-purple-400" : "text-muted-foreground"
       )}
       aria-current={active ? "page" : undefined}
     >

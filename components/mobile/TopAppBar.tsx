@@ -17,10 +17,13 @@ export function TopAppBar({ title, showBack, leftContent, rightContent }: TopApp
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border flex items-center px-4 gap-3"
-      style={{ paddingTop: "env(safe-area-inset-top)" }}
+      className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border flex items-end px-4 gap-3"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        height: "calc(56px + env(safe-area-inset-top))",
+      }}
     >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex items-center gap-2 flex-1 min-w-0 pb-3">
         {showBack && (
           <button
             onClick={() => router.back()}
@@ -36,7 +39,7 @@ export function TopAppBar({ title, showBack, leftContent, rightContent }: TopApp
         )}
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0 pb-3">
         {rightContent ?? (
           <button
             className="flex items-center justify-center w-10 h-10 rounded-full bg-muted active:bg-muted/80 transition-colors"

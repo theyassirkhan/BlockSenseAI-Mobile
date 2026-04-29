@@ -91,7 +91,8 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
       {/* FAB */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        className="fixed right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        style={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
         aria-label="Open AI Assistant"
       >
         <Sparkles className="h-6 w-6 text-white" />
