@@ -41,7 +41,7 @@ const SHIFT_LABELS = { morning: "Morning", afternoon: "Afternoon", night: "Night
 const SHIFT_COLORS: Record<string, string> = {
   morning: "#F59E0B",
   afternoon: "#38BDF8",
-  night: "#A855F7",
+  night: "#0D9488",
   full_day: "#34D399",
 };
 const PRIORITY_COLORS = { low: "secondary", medium: "info", high: "warning", urgent: "critical" };
@@ -344,16 +344,16 @@ export default function StaffPage() {
               const dayShifts = shiftsByDay[key] ?? [];
               return (
                 <div key={key} className="min-h-[120px] rounded-xl p-2 space-y-1.5" style={{
-                  background: isToday ? "rgba(168,85,247,0.08)" : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${isToday ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.07)"}`,
+                  background: isToday ? "rgba(13,148,136,0.08)" : "rgba(255,255,255,0.02)",
+                  border: `1px solid ${isToday ? "rgba(13,148,136,0.25)" : "rgba(255,255,255,0.07)"}`,
                 }}>
                   <div className="text-center">
                     <p className="text-[10px] text-muted-foreground">{DAYS[di]}</p>
-                    <p className={`text-sm font-bold ${isToday ? "text-purple-300" : "text-white"}`}>{format(day, "d")}</p>
+                    <p className={`text-sm font-bold ${isToday ? "text-teal-300" : "text-white"}`}>{format(day, "d")}</p>
                   </div>
                   {dayShifts.map(s => {
                     const member = staffMap.get(s.staffId);
-                    const color = SHIFT_COLORS[s.shiftType] ?? "#A855F7";
+                    const color = SHIFT_COLORS[s.shiftType] ?? "#0D9488";
                     return (
                       <div key={s._id} className="rounded-lg p-1.5 space-y-1" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
                         <p className="text-[10px] font-medium leading-tight truncate" style={{ color }}>{(member as any)?.name ?? "—"}</p>

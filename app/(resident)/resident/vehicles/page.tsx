@@ -20,7 +20,7 @@ const TYPE_ICON = {
 const TYPE_COLOR = {
   car: "#38BDF8",
   bike: "#34D399",
-  other: "#A855F7",
+  other: "#0D9488",
 };
 
 export default function VehiclesPage() {
@@ -137,7 +137,7 @@ export default function VehiclesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(vehicles ?? []).map((v, i) => {
           const Icon = TYPE_ICON[v.type as keyof typeof TYPE_ICON] ?? Car;
-          const color = TYPE_COLOR[v.type as keyof typeof TYPE_COLOR] ?? "#A855F7";
+          const color = TYPE_COLOR[v.type as keyof typeof TYPE_COLOR] ?? "#0D9488";
           return (
             <motion.div key={v._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
               <Card>

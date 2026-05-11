@@ -26,7 +26,7 @@ function ReportRow({ label, value, highlight }: { label: string; value: string; 
   return (
     <div className="flex justify-between items-center py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={`text-xs font-semibold ${highlight ? "text-purple-300" : "text-white"}`}>{value}</dd>
+      <dd className={`text-xs font-semibold ${highlight ? "text-teal-300" : "text-white"}`}>{value}</dd>
     </div>
   );
 }
@@ -173,7 +173,7 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-lg font-bold flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-purple-400" />
+          <BarChart3 className="h-5 w-5 text-teal-400" />
           Monthly Reports
         </h1>
         <div className="flex items-center gap-2 flex-wrap">
@@ -189,7 +189,7 @@ export default function ReportsPage() {
               {[2024, 2025, 2026].map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button size="sm" onClick={handleGenerateAI} disabled={generating || skip} className="bg-purple-600 hover:bg-purple-500 h-9">
+          <Button size="sm" onClick={handleGenerateAI} disabled={generating || skip} className="bg-teal-600 hover:bg-teal-500 h-9">
             {generating ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
             Generate AI Report
           </Button>
@@ -205,20 +205,20 @@ export default function ReportsPage() {
         <ScrollReveal>
           <motion.div
             className="rounded-2xl p-5 space-y-2"
-            style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.12), rgba(59,130,246,0.08))", border: "1px solid rgba(168,85,247,0.25)" }}
+            style={{ background: "linear-gradient(135deg, rgba(13,148,136,0.12), rgba(59,130,246,0.08))", border: "1px solid rgba(13,148,136,0.25)" }}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="h-4 w-4 text-purple-400" />
-              <span className="font-semibold text-purple-200 text-sm">AI Executive Summary</span>
-              <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">
+              <Sparkles className="h-4 w-4 text-teal-400" />
+              <span className="font-semibold text-teal-200 text-sm">AI Executive Summary</span>
+              <span className="text-[10px] bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-500/30">
                 {MONTHS[month - 1]} {year}
               </span>
             </div>
             <p className="text-sm text-gray-200 leading-relaxed">{aiReport.narrative}</p>
             {aiReport.payments && (
-              <div className="grid grid-cols-3 gap-3 mt-4 pt-4" style={{ borderTop: "1px solid rgba(168,85,247,0.2)" }}>
+              <div className="grid grid-cols-3 gap-3 mt-4 pt-4" style={{ borderTop: "1px solid rgba(13,148,136,0.2)" }}>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">Collected</p>
                   <p className="text-base font-bold text-green-300">₹{(aiReport.payments.collected as number)?.toLocaleString("en-IN")}</p>
@@ -348,13 +348,13 @@ export default function ReportsPage() {
           <ScrollReveal delay={0.2}>
             <div
               className="rounded-2xl p-5 flex flex-col items-center justify-center gap-3 cursor-pointer group transition-all min-h-[160px]"
-              style={{ background: "rgba(168,85,247,0.06)", border: "1px dashed rgba(168,85,247,0.3)" }}
+              style={{ background: "rgba(13,148,136,0.06)", border: "1px dashed rgba(13,148,136,0.3)" }}
               onClick={handleGenerateAI}
             >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
-                {generating ? <Loader2 className="h-5 w-5 text-purple-400 animate-spin" /> : <Sparkles className="h-5 w-5 text-purple-400" />}
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(13,148,136,0.15)" }}>
+                {generating ? <Loader2 className="h-5 w-5 text-teal-400 animate-spin" /> : <Sparkles className="h-5 w-5 text-teal-400" />}
               </div>
-              <p className="text-sm font-medium text-purple-300 text-center">
+              <p className="text-sm font-medium text-teal-300 text-center">
                 {generating ? "Generating AI summary…" : "Click to generate AI executive summary"}
               </p>
               <p className="text-xs text-muted-foreground text-center">Powered by Claude — analyzes all utilities and payments</p>

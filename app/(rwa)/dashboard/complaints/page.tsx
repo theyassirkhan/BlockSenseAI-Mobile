@@ -147,9 +147,9 @@ export default function ComplaintsPage() {
                     <p className="text-sm text-muted-foreground">{c.description}</p>
 
                     {c.rwaResponse && (
-                      <div className="rounded-lg p-3 space-y-1" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
-                        <p className="text-xs font-semibold text-purple-300">Previous response</p>
-                        <p className="text-sm text-purple-100">{c.rwaResponse}</p>
+                      <div className="rounded-lg p-3 space-y-1" style={{ background: "rgba(13,148,136,0.08)", border: "1px solid rgba(13,148,136,0.2)" }}>
+                        <p className="text-xs font-semibold text-teal-300">Previous response</p>
+                        <p className="text-sm text-teal-100">{c.rwaResponse}</p>
                       </div>
                     )}
 
@@ -172,7 +172,7 @@ export default function ComplaintsPage() {
                         size="sm"
                         onClick={() => handleRespond(c._id)}
                         disabled={saving === c._id}
-                        className="bg-purple-600 hover:bg-purple-500"
+                        className="bg-teal-600 hover:bg-teal-500"
                       >
                         <Send className="h-3.5 w-3.5 mr-1.5" />
                         {saving === c._id ? "Saving…" : "Send Response"}

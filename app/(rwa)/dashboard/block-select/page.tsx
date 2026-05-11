@@ -32,7 +32,7 @@ export default function BlockSelectPage() {
 
   const BLOCK_TYPE_COLORS: Record<string, string> = {
     block: "bg-blue-50 text-blue-700",
-    wing: "bg-purple-50 text-purple-700",
+    wing: "bg-teal-50 text-teal-700",
     villa: "bg-amber-50 text-amber-700",
     tower: "bg-green-50 text-green-700",
   };

@@ -13,7 +13,7 @@ import {
 
 const FEATURES = [
   { icon: Droplets, color: "#38BDF8", title: "Utility Monitoring", desc: "Real-time water, power, gas & sewage levels with predictive alerts." },
-  { icon: Bell, color: "#A855F7", title: "Smart Notifications", desc: "Instant in-app and WhatsApp alerts for residents, guards, and RWA." },
+  { icon: Bell, color: "#0D9488", title: "Smart Notifications", desc: "Instant in-app and WhatsApp alerts for residents, guards, and RWA." },
   { icon: Shield, color: "#F97316", title: "Gate Management", desc: "Digital visitor log, pre-registration, and guard duty tracking." },
   { icon: Users, color: "#34D399", title: "Resident Portal", desc: "Dues, service requests, notices, and AI assistant — all in one place." },
   { icon: BarChart3, color: "#F59E0B", title: "Payment Analytics", desc: "Track monthly collections, overdue trends, and revenue charts." },
@@ -21,7 +21,7 @@ const FEATURES = [
 ];
 
 const DEMO_ROLES = [
-  { label: "Admin", param: "admin", color: "#A855F7", desc: "Manage society, users & analytics" },
+  { label: "Admin", param: "admin", color: "#0D9488", desc: "Manage society, users & analytics" },
   { label: "RWA Manager", param: "rwa", color: "#38BDF8", desc: "Oversee operations & approvals" },
   { label: "Resident", param: "resident", color: "#34D399", desc: "Utilities, dues & requests" },
   { label: "Guard", param: "guard", color: "#F97316", desc: "Gate log & visitor passes" },
@@ -64,7 +64,7 @@ export default function LandingPage() {
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute w-[600px] h-[600px] rounded-full -top-40 -left-40 opacity-10"
-          style={{ background: "radial-gradient(circle,#A855F7,transparent)", filter: "blur(100px)" }} />
+          style={{ background: "radial-gradient(circle,#0D9488,transparent)", filter: "blur(100px)" }} />
         <div className="absolute w-[400px] h-[400px] rounded-full top-1/2 right-0 opacity-8"
           style={{ background: "radial-gradient(circle,#38BDF8,transparent)", filter: "blur(100px)" }} />
         <div className="absolute w-[500px] h-[500px] rounded-full bottom-0 left-1/3 opacity-6"
@@ -75,14 +75,14 @@ export default function LandingPage() {
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 0 16px rgba(168,85,247,0.5)" }}>
+            style={{ background: "linear-gradient(135deg,#0D9488,#0F766E)", boxShadow: "0 0 16px rgba(13,148,136,0.5)" }}>
             <span className="text-white font-bold text-xs">BS</span>
           </div>
           <span className="font-bold text-white text-lg">BlockSense</span>
         </div>
         <Link href="/login"
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
-          style={{ background: "linear-gradient(90deg,#A855F7,#7C3AED)" }}>
+          style={{ background: "linear-gradient(90deg,#0D9488,#0F766E)" }}>
           Sign in <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </nav>
@@ -91,11 +91,11 @@ export default function LandingPage() {
       <section className="relative z-10 text-center px-6 pt-16 pb-20 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6"
-            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.25)", color: "#C084FC" }}>
+            style={{ background: "rgba(13,148,136,0.12)", border: "1px solid rgba(13,148,136,0.25)", color: "#C084FC" }}>
             <Sparkles className="h-3 w-3" /> AI-powered society management
           </div>
           <h1 className="text-5xl sm:text-6xl font-black leading-tight mb-6"
-            style={{ background: "linear-gradient(135deg,#fff 40%,#A855F7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", transform: "translateZ(0)" }}>
+            style={{ background: "linear-gradient(135deg,#fff 40%,#0D9488)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", transform: "translateZ(0)" }}>
             Your society,<br />intelligently managed
           </h1>
           <p className="text-lg max-w-2xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -104,7 +104,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/login"
               className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105"
-              style={{ background: "linear-gradient(90deg,#A855F7,#7C3AED)", boxShadow: "0 0 30px rgba(168,85,247,0.3)" }}>
+              style={{ background: "linear-gradient(90deg,#0D9488,#0F766E)", boxShadow: "0 0 30px rgba(13,148,136,0.3)" }}>
               Get started free <ChevronRight className="h-4 w-4" />
             </Link>
             <a href="#demo"
@@ -143,8 +143,8 @@ export default function LandingPage() {
       {/* Demo section */}
       <section id="demo" className="relative z-10 px-6 pb-24 max-w-4xl mx-auto">
         <div className="rounded-3xl p-8 sm:p-12 text-center"
-          style={{ background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.15)" }}>
-          <Building2 className="h-10 w-10 mx-auto mb-4" style={{ color: "#A855F7" }} />
+          style={{ background: "rgba(13,148,136,0.06)", border: "1px solid rgba(13,148,136,0.15)" }}>
+          <Building2 className="h-10 w-10 mx-auto mb-4" style={{ color: "#0D9488" }} />
           <h2 className="text-3xl font-bold text-white mb-3">Try the live demo</h2>
           <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.45)" }}>
             No sign-up needed. Pick a role and explore with realistic demo data.

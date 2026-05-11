@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 const PLAN_COLOR: Record<string, string> = {
   basic: "#71717A",
   pro: "#38BDF8",
-  enterprise: "#A855F7",
+  enterprise: "#0D9488",
 };
 
 export default function AdminPage() {
@@ -65,7 +65,7 @@ export default function AdminPage() {
 
   const totalUsers = allUsers?.length ?? 0;
   const kpis = [
-    { label: "Total Societies", value: societies.length, sub: `${activeSocieties.length} active`, icon: Building2, color: "#A855F7" },
+    { label: "Total Societies", value: societies.length, sub: `${activeSocieties.length} active`, icon: Building2, color: "#0D9488" },
     { label: "Total Users", value: totalUsers, sub: "Across all societies", icon: Users, color: "#34D399" },
     { label: "Platform MRR", value: `₹${(totalMrr / 1000).toFixed(0)}K`, sub: "Monthly recurring", icon: TrendingUp, color: "#38BDF8" },
     { label: "Open Tickets", value: openTickets.length, sub: urgentTickets.length > 0 ? `${urgentTickets.length} urgent` : "None urgent", icon: AlertTriangle, color: urgentTickets.length > 0 ? "#EF4444" : "#34D399" },
@@ -130,7 +130,7 @@ export default function AdminPage() {
               initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: i * 0.06 }}
-              whileHover={{ y: -3, boxShadow: "0 12px 40px rgba(168,85,247,0.12)" }}
+              whileHover={{ y: -3, boxShadow: "0 12px 40px rgba(13,148,136,0.12)" }}
             >
               <Link href="/admin/societies">
                 <Card className="cursor-pointer h-full">
@@ -194,7 +194,7 @@ export default function AdminPage() {
                   contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 12 }}
                   formatter={(v: number) => [v, "Societies"]}
                 />
-                <Bar dataKey="count" fill="#A855F7" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#0D9488" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

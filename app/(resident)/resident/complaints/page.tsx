@@ -184,9 +184,9 @@ export default function ComplaintsPage() {
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3 pt-2 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                     <p className="text-sm text-muted-foreground">{c.description}</p>
                     {c.rwaResponse ? (
-                      <div className="rounded-lg p-3 space-y-1" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
-                        <p className="text-xs font-semibold text-purple-300">RWA Response</p>
-                        <p className="text-sm text-purple-100">{c.rwaResponse}</p>
+                      <div className="rounded-lg p-3 space-y-1" style={{ background: "rgba(13,148,136,0.08)", border: "1px solid rgba(13,148,136,0.2)" }}>
+                        <p className="text-xs font-semibold text-teal-300">RWA Response</p>
+                        <p className="text-sm text-teal-100">{c.rwaResponse}</p>
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground/60 italic">Awaiting RWA response…</p>

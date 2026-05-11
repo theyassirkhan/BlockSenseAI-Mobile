@@ -19,7 +19,7 @@ type Intent = "create" | "join";
 interface StepProps { onNext: (data: any) => void; onBack?: () => void; loading?: boolean }
 
 const ROLES: { value: Role; label: string; desc: string; icon: React.ElementType; color: string; bg: string }[] = [
-  { value: "admin",    label: "Society Admin",  desc: "Create and manage a society",        icon: ShieldCheck, color: "#A855F7", bg: "rgba(168,85,247,0.1)" },
+  { value: "admin",    label: "Society Admin",  desc: "Create and manage a society",        icon: ShieldCheck, color: "#0D9488", bg: "rgba(13,148,136,0.1)" },
   { value: "rwa",      label: "RWA Manager",    desc: "Oversee operations and approvals",   icon: Users,       color: "#38BDF8", bg: "rgba(56,189,248,0.1)" },
   { value: "resident", label: "Resident",       desc: "Track utilities, raise complaints",  icon: Home,        color: "#34D399", bg: "rgba(52,211,153,0.1)" },
   { value: "guard",    label: "Security Guard", desc: "Manage gate and visitor log",        icon: Shield,      color: "#F97316", bg: "rgba(249,115,22,0.1)" },
@@ -32,7 +32,7 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
         <div
           key={i}
           className="h-1 flex-1 rounded-full transition-all duration-500"
-          style={{ background: i < step ? "#A855F7" : "rgba(255,255,255,0.1)" }}
+          style={{ background: i < step ? "#0D9488" : "rgba(255,255,255,0.1)" }}
         />
       ))}
     </div>
@@ -48,7 +48,7 @@ function NavButton({ onClick, disabled, variant = "primary", children }: {
       disabled={disabled}
       className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40"
       style={variant === "primary"
-        ? { background: "linear-gradient(90deg,#A855F7,#7C3AED)", color: "#fff" }
+        ? { background: "linear-gradient(90deg,#0D9488,#0F766E)", color: "#fff" }
         : { background: "rgba(255,255,255,0.06)", color: "#A1A1AA", border: "1px solid rgba(255,255,255,0.08)" }
       }
     >
@@ -244,7 +244,7 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#050508" }}>
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+          <Loader2 className="h-8 w-8 text-teal-400 animate-spin" />
           <p className="text-gray-400 text-sm">Setting up your demo…</p>
         </div>
       </div>
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
       {/* Background orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute w-96 h-96 rounded-full -top-20 -left-20 opacity-20"
-          style={{ background: "radial-gradient(circle,#A855F7,transparent)", filter: "blur(80px)" }} />
+          style={{ background: "radial-gradient(circle,#0D9488,transparent)", filter: "blur(80px)" }} />
         <div className="absolute w-80 h-80 rounded-full bottom-0 right-0 opacity-10"
           style={{ background: "radial-gradient(circle,#38BDF8,transparent)", filter: "blur(80px)" }} />
       </div>
@@ -271,7 +271,7 @@ export default function OnboardingPage() {
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 0 20px rgba(168,85,247,0.5)" }}>
+            style={{ background: "linear-gradient(135deg,#0D9488,#0F766E)", boxShadow: "0 0 20px rgba(13,148,136,0.5)" }}>
             <span className="text-white font-bold text-xs">BS</span>
           </div>
           <span className="font-bold text-white text-lg">BlockSense</span>
@@ -283,7 +283,7 @@ export default function OnboardingPage() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-5 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
-            style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)", color: "#C084FC" }}
+            style={{ background: "rgba(13,148,136,0.1)", border: "1px solid rgba(13,148,136,0.25)", color: "#C084FC" }}
           >
             <span>⚡</span>
             <span>Demo Mode — fields are pre-filled with sample data. Edit anything before continuing.</span>
@@ -327,7 +327,7 @@ export default function OnboardingPage() {
                           placeholder="e.g. Rahul Sharma"
                           className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                           onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                         />
                       </div>
@@ -343,7 +343,7 @@ export default function OnboardingPage() {
                           placeholder="+91 98765 43210"
                           className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                           onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                         />
                       </div>
@@ -414,7 +414,7 @@ export default function OnboardingPage() {
                   <div className="space-y-3">
                     {[
                       { value: "join" as Intent, label: "Join existing society", desc: "Search for your society by name", icon: Search, color: "#38BDF8" },
-                      { value: "create" as Intent, label: "Create new society", desc: "Set up a society for your community", icon: Building2, color: "#A855F7" },
+                      { value: "create" as Intent, label: "Create new society", desc: "Set up a society for your community", icon: Building2, color: "#0D9488" },
                     ].map(opt => (
                       <button
                         key={opt.value}
@@ -490,12 +490,12 @@ export default function OnboardingPage() {
                       <input value={socName} onChange={e => setSocName(e.target.value)} placeholder="Society name *"
                         className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                         onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
                       <input value={socCity} onChange={e => setSocCity(e.target.value)} placeholder="City *"
                         className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                         onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
                     </motion.div>
                   )}
@@ -537,7 +537,7 @@ export default function OnboardingPage() {
                         <input value={value} onChange={e => setter(e.target.value)} placeholder={placeholder}
                           className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                          onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                           onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")} />
                       </div>
                     ))}
@@ -575,8 +575,8 @@ export default function OnboardingPage() {
                               onClick={() => setBlockId(b._id)}
                               className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                               style={{
-                                background: blockId === b._id ? "rgba(168,85,247,0.2)" : "rgba(255,255,255,0.04)",
-                                border: `1px solid ${blockId === b._id ? "rgba(168,85,247,0.6)" : "rgba(255,255,255,0.08)"}`,
+                                background: blockId === b._id ? "rgba(13,148,136,0.2)" : "rgba(255,255,255,0.04)",
+                                border: `1px solid ${blockId === b._id ? "rgba(13,148,136,0.6)" : "rgba(255,255,255,0.08)"}`,
                                 color: blockId === b._id ? "#C084FC" : "#A1A1AA",
                               }}
                             >
@@ -598,7 +598,7 @@ export default function OnboardingPage() {
                             placeholder="e.g. A-204"
                             className="w-full pl-9 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all"
                             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                            onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                            onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                             onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                           />
                         </div>
@@ -624,7 +624,7 @@ export default function OnboardingPage() {
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 200, damping: 15 }}
                       className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4"
-                      style={{ background: "linear-gradient(135deg,#A855F7,#7C3AED)", boxShadow: "0 0 40px rgba(168,85,247,0.4)" }}
+                      style={{ background: "linear-gradient(135deg,#0D9488,#0F766E)", boxShadow: "0 0 40px rgba(13,148,136,0.4)" }}
                     >
                       <Check className="h-8 w-8 text-white" />
                     </motion.div>
@@ -634,7 +634,7 @@ export default function OnboardingPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl p-4 space-y-2" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
+                  <div className="rounded-xl p-4 space-y-2" style={{ background: "rgba(13,148,136,0.08)", border: "1px solid rgba(13,148,136,0.2)" }}>
                     {[
                       ["Name", name],
                       ["Role", "Society Admin"],

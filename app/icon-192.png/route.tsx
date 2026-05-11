@@ -14,7 +14,7 @@ export async function GET() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "3px solid rgba(168,85,247,0.35)",
+          border: "3px solid rgba(13,148,136,0.35)",
         }}
       >
         <span

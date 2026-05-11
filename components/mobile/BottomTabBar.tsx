@@ -39,7 +39,7 @@ export function BottomTabBar() {
         <Link
           href="/dashboard/actions"
           className="flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg -mt-5 active:scale-95 transition-transform"
-          style={{ background: "linear-gradient(135deg, #A855F7, #7C3AED)" }}
+          style={{ background: "linear-gradient(135deg, #0D9488, #0F766E)" }}
           aria-label="Quick actions"
         >
           <Plus size={26} strokeWidth={2.5} />
@@ -59,7 +59,7 @@ function TabLink({ tab, active }: { tab: TabItem; active: boolean }) {
       href={tab.href}
       className={cn(
         "flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-[44px] min-h-[44px] text-xs transition-colors",
-        active ? "text-purple-400" : "text-muted-foreground"
+        active ? "text-teal-400" : "text-muted-foreground"
       )}
       aria-current={active ? "page" : undefined}
     >

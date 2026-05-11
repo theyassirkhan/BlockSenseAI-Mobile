@@ -69,7 +69,7 @@ function ResidentHomePageInner() {
       sub: gasLatest ? "PSI" : "No readings",
     },
     {
-      label: "Alerts", icon: Bell, color: alerts && alerts.length > 0 ? "#EF4444" : "#A855F7",
+      label: "Alerts", icon: Bell, color: alerts && alerts.length > 0 ? "#EF4444" : "#0D9488",
       value: alerts?.length ?? 0,
       sub: alerts && alerts.length > 0 ? "Active" : "All clear",
     },

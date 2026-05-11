@@ -91,7 +91,7 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
       {/* FAB */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        className="fixed right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-teal-600 to-blue-600 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
         style={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
         aria-label="Open AI Assistant"
       >
@@ -104,11 +104,11 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
           <div className="pointer-events-auto w-full max-w-sm bg-gray-950 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             style={{ height: "min(560px, calc(100vh - 100px))" }}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-900/60 to-blue-900/60 border-b border-white/10 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-teal-900/60 to-blue-900/60 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-300" />
+                <Sparkles className="h-4 w-4 text-teal-300" />
                 <span className="font-semibold text-sm text-white">BlockSense AI</span>
-                <span className="text-[10px] bg-purple-500/30 text-purple-300 px-1.5 py-0.5 rounded-full">Beta</span>
+                <span className="text-[10px] bg-teal-500/30 text-teal-300 px-1.5 py-0.5 rounded-full">Beta</span>
               </div>
               <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">
                 <X className="h-4 w-4" />
@@ -122,10 +122,10 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
                   <div className={cn(
                     "max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed",
                     m.role === "user"
-                      ? "bg-purple-600 text-white rounded-br-sm"
+                      ? "bg-teal-600 text-white rounded-br-sm"
                       : "bg-gray-800 text-gray-100 rounded-bl-sm"
                   )}>
-                    {m.role === "ai" && <Sparkles className="h-3 w-3 text-purple-400 inline mr-1 mb-0.5" />}
+                    {m.role === "ai" && <Sparkles className="h-3 w-3 text-teal-400 inline mr-1 mb-0.5" />}
                     {m.text}
                   </div>
                 </div>
@@ -133,7 +133,7 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-gray-800 rounded-2xl rounded-bl-sm px-3 py-2">
-                    <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                    <Loader2 className="h-4 w-4 text-teal-400 animate-spin" />
                   </div>
                 </div>
               )}
@@ -169,7 +169,7 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
                 <button
                   onClick={() => handleSend()}
                   disabled={!input.trim() || loading}
-                  className="text-purple-400 hover:text-purple-300 disabled:opacity-30 transition-colors"
+                  className="text-teal-400 hover:text-teal-300 disabled:opacity-30 transition-colors"
                 >
                   <Send className="h-4 w-4" />
                 </button>

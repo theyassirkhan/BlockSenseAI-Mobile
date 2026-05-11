@@ -148,7 +148,7 @@ function DashboardPageInner() {
       href: "/dashboard/gas",
     },
     {
-      label: "Alerts", icon: AlertTriangle, color: criticalAlerts.length > 0 ? "#EF4444" : "#A855F7",
+      label: "Alerts", icon: AlertTriangle, color: criticalAlerts.length > 0 ? "#EF4444" : "#0D9488",
       value: alerts?.length ?? 0,
       sub: criticalAlerts.length > 0 ? `${criticalAlerts.length} critical` : "All clear",
       href: "/dashboard/alerts",
@@ -189,7 +189,7 @@ function DashboardPageInner() {
           {societyId && blockId && (
             <PdfReportButton societyId={societyId} blockId={blockId} societyName={profile?.name ?? "Society"} />
           )}
-          <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10">
+          <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="border-white/10 hover:border-teal-500/50 hover:bg-teal-500/10">
             {seeding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
             Load demo data
           </Button>
@@ -224,7 +224,7 @@ function DashboardPageInner() {
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: "Days until critical", value: waterPred.daysUntilCritical, color: waterPred.daysUntilCritical < 3 ? "#EF4444" : waterPred.daysUntilCritical < 7 ? "#F59E0B" : "#34D399" },
-                      { label: "Avg daily use", value: `${waterPred.avgDailyConsumption} KL`, color: "#A855F7" },
+                      { label: "Avg daily use", value: `${waterPred.avgDailyConsumption} KL`, color: "#0D9488" },
                     ].map(({ label, value, color }) => (
                       <div key={label} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
                         <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</p>
@@ -299,7 +299,7 @@ function DashboardPageInner() {
               <div className="grid grid-cols-3 gap-6">
                 {[
                   { label: "Water level", value: healthScore.breakdown.water, max: 40, color: "#38BDF8" },
-                  { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30, color: "#A855F7" },
+                  { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30, color: "#0D9488" },
                   { label: "Waste segregation", value: healthScore.breakdown.waste, max: 30, color: "#34D399" },
                 ].map(({ label, value, max, color }, i) => (
                   <motion.div key={label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>

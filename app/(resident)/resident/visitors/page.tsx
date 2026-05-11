@@ -94,10 +94,10 @@ export default function VisitorsPage() {
     <div className="space-y-5 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-purple-400" />
+          <UserPlus className="h-5 w-5 text-teal-400" />
           My Visitors
         </h1>
-        <Button size="sm" onClick={() => setShowForm(p => !p)} className="bg-purple-600 hover:bg-purple-500">
+        <Button size="sm" onClick={() => setShowForm(p => !p)} className="bg-teal-600 hover:bg-teal-500">
           <UserPlus className="h-3.5 w-3.5 mr-1.5" />
           Invite Guest
         </Button>
@@ -114,7 +114,7 @@ export default function VisitorsPage() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <CalendarClock className="h-4 w-4 text-purple-400" /> Invite a guest
+                  <CalendarClock className="h-4 w-4 text-teal-400" /> Invite a guest
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -132,12 +132,12 @@ export default function VisitorsPage() {
                   <Label className="text-xs text-muted-foreground">Expected arrival *</Label>
                   <Input type="datetime-local" value={form.expectedAt} onChange={e => setForm(p => ({ ...p, expectedAt: e.target.value }))} />
                 </div>
-                <div className="rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
-                  <QrCode className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
-                  <span className="text-purple-300">A branded QR gate pass will be sent to the guest via WhatsApp and SMS automatically.</span>
+                <div className="rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: "rgba(13,148,136,0.08)", border: "1px solid rgba(13,148,136,0.2)" }}>
+                  <QrCode className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
+                  <span className="text-teal-300">A branded QR gate pass will be sent to the guest via WhatsApp and SMS automatically.</span>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleSubmit} disabled={saving} className="bg-purple-600 hover:bg-purple-500">
+                  <Button onClick={handleSubmit} disabled={saving} className="bg-teal-600 hover:bg-teal-500">
                     {saving ? "Sending…" : "Send Gate Pass"}
                   </Button>
                   <Button variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
@@ -178,11 +178,11 @@ export default function VisitorsPage() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <div className="font-mono text-base font-bold text-purple-300 tracking-widest">{v.passCode}</div>
+                      <div className="font-mono text-base font-bold text-teal-300 tracking-widest">{v.passCode}</div>
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => setQrVisitor(v)}
-                          className="flex items-center gap-1 text-[11px] text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 px-2 py-1 rounded-lg transition-colors"
+                          className="flex items-center gap-1 text-[11px] text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 px-2 py-1 rounded-lg transition-colors"
                         >
                           <QrCode className="h-3.5 w-3.5" /> QR
                         </button>
@@ -229,7 +229,7 @@ export default function VisitorsPage() {
 
       {/* QR Gate Pass Modal */}
       <Dialog open={!!qrVisitor} onOpenChange={() => setQrVisitor(null)}>
-        <DialogContent className="p-0 max-w-sm border-purple-500/30 bg-transparent shadow-2xl">
+        <DialogContent className="p-0 max-w-sm border-teal-500/30 bg-transparent shadow-2xl">
           <DialogHeader className="sr-only">
             <DialogTitle>Gate Pass</DialogTitle>
           </DialogHeader>
@@ -241,7 +241,7 @@ export default function VisitorsPage() {
                 style={{ height: "560px" }}
                 title="Gate Pass"
               />
-              <div className="bg-[#0f0829] px-4 py-3 flex justify-between items-center border-t border-purple-500/20">
+              <div className="bg-[#0f0829] px-4 py-3 flex justify-between items-center border-t border-teal-500/20">
                 <button onClick={() => sharePass(qrVisitor)} className="flex items-center gap-1.5 text-sm text-green-400 hover:text-green-300">
                   <Share2 className="h-4 w-4" /> Share Pass
                 </button>
@@ -249,7 +249,7 @@ export default function VisitorsPage() {
                   href={`/gatepass/${qrVisitor.passCode}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300"
+                  className="flex items-center gap-1 text-xs text-teal-400 hover:text-teal-300"
                 >
                   Full page <ExternalLink className="h-3 w-3" />
                 </a>

@@ -10,14 +10,14 @@ import { api } from "@/convex/_generated/api";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 
 const DEMO_ROLES = [
-  { role: "admin" as const,    label: "Admin",          desc: "Full platform access", icon: ShieldCheck,  color: "#A855F7", glow: "rgba(168,85,247,0.25)" },
+  { role: "admin" as const,    label: "Admin",          desc: "Full platform access", icon: ShieldCheck,  color: "#0D9488", glow: "rgba(13,148,136,0.25)" },
   { role: "rwa" as const,      label: "RWA Manager",    desc: "Manage & approve",     icon: Users,        color: "#38BDF8", glow: "rgba(56,189,248,0.25)" },
   { role: "resident" as const, label: "Resident",       desc: "View & report",        icon: Home,         color: "#34D399", glow: "rgba(52,211,153,0.25)" },
   { role: "guard" as const,    label: "Security Guard", desc: "Gate & visitor log",   icon: ShieldAlert,  color: "#F97316", glow: "rgba(249,115,22,0.25)" },
 ];
 
 const FEATURES = [
-  { icon: Zap, label: "Real-time sync", color: "#A855F7" },
+  { icon: Zap, label: "Real-time sync", color: "#0D9488" },
   { icon: BarChart3, label: "AI predictions", color: "#38BDF8" },
   { icon: Shield, label: "End-to-end alerts", color: "#34D399" },
 ];
@@ -42,7 +42,7 @@ function Grid() {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(168,85,247,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.08) 1px, transparent 1px)",
+            "linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
           transformOrigin: "50% 0%",
           rotateX: "55deg",
@@ -189,7 +189,7 @@ function LoginPageInner() {
 
       {/* ── Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <Orb style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "rgba(168,85,247,0.15)" }} animateVals={{ x: [0, 40, 0], y: [0, -30, 0] }} />
+        <Orb style={{ width: 500, height: 500, top: "-10%", left: "-5%", background: "rgba(13,148,136,0.15)" }} animateVals={{ x: [0, 40, 0], y: [0, -30, 0] }} />
         <Orb style={{ width: 400, height: 400, bottom: "0%", right: "30%", background: "rgba(99,102,241,0.1)" }} animateVals={{ x: [0, -30, 0], y: [0, 20, 0] }} />
         <Orb style={{ width: 300, height: 300, top: "30%", right: "5%", background: "rgba(56,189,248,0.07)" }} animateVals={{ x: [0, 20, 0], y: [0, -40, 0] }} />
         {/* Noise */}
@@ -210,8 +210,8 @@ function LoginPageInner() {
           <motion.div className="flex items-center gap-3" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
             <motion.div
               className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, #A855F7, #7C3AED)", boxShadow: "0 0 24px rgba(168,85,247,0.6)" }}
-              animate={{ boxShadow: ["0 0 24px rgba(168,85,247,0.4)", "0 0 40px rgba(168,85,247,0.7)", "0 0 24px rgba(168,85,247,0.4)"] }}
+              style={{ background: "linear-gradient(135deg, #0D9488, #0F766E)", boxShadow: "0 0 24px rgba(13,148,136,0.6)" }}
+              animate={{ boxShadow: ["0 0 24px rgba(13,148,136,0.4)", "0 0 40px rgba(13,148,136,0.7)", "0 0 24px rgba(13,148,136,0.4)"] }}
               transition={{ duration: 3, repeat: Infinity }}
               whileHover={{ scale: 1.1, rotate: 6 }}
             >
@@ -242,7 +242,7 @@ function LoginPageInner() {
                         required
                         className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none transition-all duration-200"
                         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(168,85,247,0.7)")}
+                        onFocus={e => (e.currentTarget.style.borderColor = "rgba(13,148,136,0.7)")}
                         onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
                       />
                     </div>
@@ -250,8 +250,8 @@ function LoginPageInner() {
                       type="submit"
                       disabled={loading}
                       className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 overflow-hidden relative"
-                      style={{ background: "linear-gradient(90deg, #A855F7, #7C3AED)" }}
-                      whileHover={{ scale: 1.02, boxShadow: "0 8px 32px rgba(168,85,247,0.55)" }}
+                      style={{ background: "linear-gradient(90deg, #0D9488, #0F766E)" }}
+                      whileHover={{ scale: 1.02, boxShadow: "0 8px 32px rgba(13,148,136,0.55)" }}
                       whileTap={{ scale: 0.97 }}
                     >
                       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send code"}
@@ -312,10 +312,10 @@ function LoginPageInner() {
                           onKeyDown={e => handleOtpKeyDown(i, e)}
                           className="w-10 h-12 text-center text-xl font-bold text-white rounded-xl outline-none transition-all duration-150 shrink-0"
                           style={{
-                            background: digit ? "rgba(168,85,247,0.18)" : "rgba(255,255,255,0.04)",
-                            border: digit ? "2px solid #A855F7" : "1px solid rgba(255,255,255,0.1)",
-                            boxShadow: digit ? "0 0 16px rgba(168,85,247,0.35)" : "none",
-                            caretColor: "#A855F7",
+                            background: digit ? "rgba(13,148,136,0.18)" : "rgba(255,255,255,0.04)",
+                            border: digit ? "2px solid #0D9488" : "1px solid rgba(255,255,255,0.1)",
+                            boxShadow: digit ? "0 0 16px rgba(13,148,136,0.35)" : "none",
+                            caretColor: "#0D9488",
                           }}
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -328,8 +328,8 @@ function LoginPageInner() {
                       type="submit"
                       disabled={loading || otp.some(d => !d)}
                       className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50"
-                      style={{ background: "linear-gradient(90deg, #A855F7, #7C3AED)" }}
-                      whileHover={{ scale: 1.02, boxShadow: "0 8px 32px rgba(168,85,247,0.55)" }}
+                      style={{ background: "linear-gradient(90deg, #0D9488, #0F766E)" }}
+                      whileHover={{ scale: 1.02, boxShadow: "0 8px 32px rgba(13,148,136,0.55)" }}
                       whileTap={{ scale: 0.97 }}
                     >
                       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
@@ -358,8 +358,8 @@ function LoginPageInner() {
 
       {/* ── Right panel ── */}
       <div className="hidden lg:flex flex-col items-center justify-center w-[480px] xl:w-[560px] relative overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, transparent, rgba(168,85,247,0.4), transparent)" }} />
-        <Orb style={{ width: 350, height: 350, top: "10%", right: "10%", background: "rgba(168,85,247,0.1)" }} animateVals={{ scale: [1, 1.1, 1] }} />
+        <div className="absolute left-0 top-0 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, transparent, rgba(13,148,136,0.4), transparent)" }} />
+        <Orb style={{ width: 350, height: 350, top: "10%", right: "10%", background: "rgba(13,148,136,0.1)" }} animateVals={{ scale: [1, 1.1, 1] }} />
 
         <div className="relative z-10 flex flex-col items-center gap-10 px-12 text-center">
 
@@ -367,22 +367,22 @@ function LoginPageInner() {
           <motion.div className="relative" animate={{ y: [0, -14, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
             <motion.div
               className="w-28 h-28 rounded-3xl flex items-center justify-center"
-              style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", boxShadow: "0 0 60px rgba(168,85,247,0.2), inset 0 0 40px rgba(168,85,247,0.05)" }}
+              style={{ background: "rgba(13,148,136,0.1)", border: "1px solid rgba(13,148,136,0.3)", boxShadow: "0 0 60px rgba(13,148,136,0.2), inset 0 0 40px rgba(13,148,136,0.05)" }}
               animate={{ rotate: [0, 3, -3, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             >
-              <span className="text-4xl font-black" style={{ background: "linear-gradient(135deg, #A855F7, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BS</span>
+              <span className="text-4xl font-black" style={{ background: "linear-gradient(135deg, #0D9488, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BS</span>
             </motion.div>
             {/* Orbiting dot */}
-            <motion.div className="absolute w-3 h-3 rounded-full" style={{ background: "#A855F7", boxShadow: "0 0 12px #A855F7", top: -4, right: -4 }} animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
+            <motion.div className="absolute w-3 h-3 rounded-full" style={{ background: "#0D9488", boxShadow: "0 0 12px #0D9488", top: -4, right: -4 }} animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
             {/* Pulse ring */}
-            <motion.div className="absolute inset-0 rounded-3xl" style={{ border: "1px solid rgba(168,85,247,0.3)" }} animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }} transition={{ duration: 2.5, repeat: Infinity }} />
+            <motion.div className="absolute inset-0 rounded-3xl" style={{ border: "1px solid rgba(13,148,136,0.3)" }} animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }} transition={{ duration: 2.5, repeat: Infinity }} />
           </motion.div>
 
           <div className="space-y-3">
             <motion.h2 className="text-4xl font-bold text-white leading-tight" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               The Smart Community<br />
-              <span style={{ background: "linear-gradient(90deg, #A855F7, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Operating System</span>
+              <span style={{ background: "linear-gradient(90deg, #0D9488, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Operating System</span>
             </motion.h2>
             <motion.p className="text-sm leading-relaxed" style={{ color: "#71717A" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               Monitor utilities, manage residents, predict resource needs — all in real-time.
@@ -414,7 +414,7 @@ function LoginPageInner() {
           <motion.div className="flex gap-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
             {[["500+", "Societies"], ["50K+", "Residents"], ["99.9%", "Uptime"]].map(([val, lbl]) => (
               <div key={lbl} className="text-center">
-                <div className="text-xl font-bold" style={{ background: "linear-gradient(135deg, #A855F7, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{val}</div>
+                <div className="text-xl font-bold" style={{ background: "linear-gradient(135deg, #0D9488, #38BDF8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{val}</div>
                 <div className="text-xs mt-0.5" style={{ color: "#52525B" }}>{lbl}</div>
               </div>
             ))}

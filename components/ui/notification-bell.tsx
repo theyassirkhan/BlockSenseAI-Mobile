@@ -8,7 +8,7 @@ import { formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLOR: Record<string, string> = {
-  notice: "#A855F7",
+  notice: "#0D9488",
   visitor: "#38BDF8",
   payment: "#34D399",
   invite: "#F59E0B",

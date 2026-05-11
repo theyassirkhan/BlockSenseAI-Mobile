@@ -143,7 +143,7 @@ export default function ResidentsPage() {
           <Button size="sm" variant="outline" onClick={() => { setShowInvite(p => !p); setCreatedToken(null); }} className="h-9 border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/10">
             <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Invite
           </Button>
-          <Button size="sm" variant="outline" onClick={() => { setShowImport(p => !p); setPreview([]); setImportResult(null); }} className="h-9 border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10">
+          <Button size="sm" variant="outline" onClick={() => { setShowImport(p => !p); setPreview([]); setImportResult(null); }} className="h-9 border-white/10 hover:border-teal-500/50 hover:bg-teal-500/10">
             <Upload className="h-3.5 w-3.5 mr-1.5" /> CSV Import
           </Button>
         </div>
@@ -250,7 +250,7 @@ export default function ResidentsPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Upload className="h-4 w-4 text-purple-400" />
+                <Upload className="h-4 w-4 text-teal-400" />
                 Bulk Resident Import
               </CardTitle>
               <button onClick={() => { setShowImport(false); setPreview([]); setImportResult(null); }}>
@@ -303,7 +303,7 @@ export default function ResidentsPage() {
                     <p className="text-xs text-muted-foreground px-3 py-2">…and {preview.length - 5} more rows</p>
                   )}
                 </div>
-                <Button onClick={handleImport} disabled={importing} className="bg-purple-600 hover:bg-purple-500 text-white">
+                <Button onClick={handleImport} disabled={importing} className="bg-teal-600 hover:bg-teal-500 text-white">
                   {importing ? "Importing…" : `Import ${preview.length} residents`}
                 </Button>
               </>

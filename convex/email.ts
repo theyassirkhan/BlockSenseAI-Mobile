@@ -28,7 +28,7 @@ export const sendVisitorArrivalEmail = internalAction({
       args.residentEmail,
       `Visitor arrived at ${args.societyName}`,
       `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px">
-        <h2 style="color:#A855F7">Visitor Alert 🔔</h2>
+        <h2 style="color:#0D9488">Visitor Alert 🔔</h2>
         <p>Hi ${args.residentName},</p>
         <p>A visitor has arrived at the gate for <strong>Flat ${args.flatNumber}</strong>.</p>
         <table style="border-collapse:collapse;width:100%;margin:16px 0">

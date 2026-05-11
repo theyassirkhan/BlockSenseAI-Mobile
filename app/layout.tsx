@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "sonner";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "BlockSense",
@@ -38,8 +45,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: [
-    { media: "(prefers-color-scheme: dark)",  color: "#0a0a0c" },
-    { media: "(prefers-color-scheme: light)", color: "#0a0a0c" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0D9488" },
+    { media: "(prefers-color-scheme: light)", color: "#0D9488" },
   ],
   viewportFit: "cover",
 };
@@ -47,7 +54,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" className={inter.variable} suppressHydrationWarning>
         <body>
           <ThemeProvider
             attribute="class"
@@ -58,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             <ConvexClientProvider>
               {children}
-              <Toaster position="top-right" richColors closeButton />
+              <Toaster position="top-center" richColors closeButton />
               <InstallPrompt />
             </ConvexClientProvider>
           </ThemeProvider>

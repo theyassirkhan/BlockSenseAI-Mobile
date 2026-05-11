@@ -120,7 +120,7 @@ export default function WastePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <GlassStatCard label="Dry waste" value={`${totalDry.toFixed(1)} KG`} sub="30 days" icon={Trash2} color="#E879A0" index={0} />
         <GlassStatCard label="Wet waste" value={`${totalWet.toFixed(1)} KG`} sub="30 days" icon={Trash2} color="#34D399" index={1} />
-        <GlassStatCard label="Total" value={`${totalKG.toFixed(1)} KG`} sub="combined" icon={Trash2} color="#A855F7" index={2} />
+        <GlassStatCard label="Total" value={`${totalKG.toFixed(1)} KG`} sub="combined" icon={Trash2} color="#0D9488" index={2} />
         <GlassStatCard
           label="Compliance"
           value={`${compliance}%`}
