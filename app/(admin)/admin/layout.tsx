@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background">
       <AdminSidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((p) => !p)}
@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <AdminHeader onMenuOpen={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5">{children}</main>
       </div>
     </div>
   );

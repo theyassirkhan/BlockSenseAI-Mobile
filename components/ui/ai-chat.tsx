@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Sparkles, Send, X, MessageCircle, Loader2 } from "lucide-react";
+import { Sparkles, Send, X, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface Message { role: "user" | "ai"; text: string; ts: number; }
@@ -33,7 +34,6 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
   const bottomRef = useRef<HTMLDivElement>(null);
   const chat = useAction(api.ai.residentChat);
 
-  // Build live context from queries
   const dues = useQuery(api.payments.getMyDues, { societyId: societyId as any });
   const alerts = useQuery(api.alerts.getActiveAlerts, { societyId: societyId as any, blockId: blockId as any });
   const tanks = useQuery(api.water.getTankLevels, { societyId: societyId as any, blockId: blockId as any });
@@ -41,6 +41,15 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Close on Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    if (open) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   function buildContext() {
     const pendingDues = (dues ?? []).filter(d => d.status === "pending" || d.status === "overdue");
@@ -63,16 +72,9 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
     setMessages(prev => [...prev, { role: "user", text: msg, ts: Date.now() }]);
     setLoading(true);
     try {
-      const res = await chat({
-        message: msg,
-        societyName,
-        residentName,
-        flatNumber,
-        context: buildContext(),
-      });
+      const res = await chat({ message: msg, societyName, residentName, flatNumber, context: buildContext() });
       setMessages(prev => [...prev, { role: "ai", text: res.reply, ts: Date.now() }]);
     } catch (err) {
-      console.error("[AiChat] residentChat failed:", err);
       const isConfig = err instanceof Error && err.message.includes("GOOGLE_AI_API_KEY");
       setMessages(prev => [...prev, {
         role: "ai",
@@ -91,93 +93,112 @@ export function AiChat({ societyId, blockId, residentName, flatNumber, societyNa
       {/* FAB */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-teal-600 to-blue-600 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
-        style={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
+        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-base"
+        style={{ background: "linear-gradient(135deg, #0D9488, #0F766E)" }}
         aria-label="Open AI Assistant"
       >
         <Sparkles className="h-6 w-6 text-white" />
       </button>
 
-      {/* Chat panel */}
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-end p-4 sm:p-6 pointer-events-none">
-          <div className="pointer-events-auto w-full max-w-sm bg-gray-950 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-            style={{ height: "min(560px, calc(100vh - 100px))" }}>
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-teal-900/60 to-blue-900/60 border-b border-white/10 shrink-0">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-teal-300" />
-                <span className="font-semibold text-sm text-white">BlockSense AI</span>
-                <span className="text-[10px] bg-teal-500/30 text-teal-300 px-1.5 py-0.5 rounded-full">Beta</span>
-              </div>
-              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 bg-black/20 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setOpen(false)}
+            />
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-              {messages.map((m, i) => (
-                <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                  <div className={cn(
-                    "max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed",
-                    m.role === "user"
-                      ? "bg-teal-600 text-white rounded-br-sm"
-                      : "bg-gray-800 text-gray-100 rounded-bl-sm"
-                  )}>
-                    {m.role === "ai" && <Sparkles className="h-3 w-3 text-teal-400 inline mr-1 mb-0.5" />}
-                    {m.text}
-                  </div>
+            {/* Panel — fixed, slides from right, never causes page overflow */}
+            <motion.div
+              className="fixed top-0 right-0 bottom-0 w-full sm:w-[480px] max-w-full z-50 bg-card border-l border-border flex flex-col overflow-hidden shadow-xl"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0"
+                style={{ background: "rgba(13,148,136,0.08)" }}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-teal-400" />
+                  <span className="font-semibold text-sm">BlockSense AI</span>
+                  <span className="text-[10px] bg-teal-500/20 text-teal-400 px-1.5 py-0.5 rounded-full">Beta</span>
                 </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-800 rounded-2xl rounded-bl-sm px-3 py-2">
-                    <Loader2 className="h-4 w-4 text-teal-400 animate-spin" />
-                  </div>
-                </div>
-              )}
-              <div ref={bottomRef} />
-            </div>
-
-            {/* Quick questions */}
-            {messages.length <= 1 && (
-              <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
-                {QUICK_QUESTIONS.map(q => (
-                  <button
-                    key={q}
-                    onClick={() => handleSend(q)}
-                    className="text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2.5 py-1 rounded-full border border-gray-700 transition-colors"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input */}
-            <div className="px-3 pb-3 pt-2 shrink-0 border-t border-white/5">
-              <div className="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
-                <input
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-gray-500 outline-none"
-                  placeholder="Ask anything…"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
-                  disabled={loading}
-                />
-                <button
-                  onClick={() => handleSend()}
-                  disabled={!input.trim() || loading}
-                  className="text-teal-400 hover:text-teal-300 disabled:opacity-30 transition-colors"
-                >
-                  <Send className="h-4 w-4" />
+                <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-1" aria-label="Close chat">
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                {messages.map((m, i) => (
+                  <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+                    <div className={cn(
+                      "max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed",
+                      m.role === "user"
+                        ? "bg-teal-600 text-white rounded-br-sm"
+                        : "bg-muted text-foreground rounded-bl-sm"
+                    )}>
+                      {m.role === "ai" && <Sparkles className="h-3 w-3 text-teal-400 inline mr-1 mb-0.5" />}
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-xl rounded-bl-sm px-3 py-2">
+                      <Loader2 className="h-4 w-4 text-teal-400 animate-spin" />
+                    </div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Quick questions */}
+              {messages.length <= 1 && (
+                <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
+                  {QUICK_QUESTIONS.map(q => (
+                    <button
+                      key={q}
+                      onClick={() => handleSend(q)}
+                      className="text-[11px] bg-muted hover:bg-muted/80 text-muted-foreground px-2.5 py-1 rounded-full border border-border transition-colors duration-base"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Input */}
+              <div className="px-3 pb-3 pt-2 shrink-0 border-t border-border">
+                <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
+                  <input
+                    className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground outline-none min-w-0"
+                    placeholder="Ask anything…"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+                    disabled={loading}
+                  />
+                  <button
+                    onClick={() => handleSend()}
+                    disabled={!input.trim() || loading}
+                    className="text-teal-400 hover:text-teal-300 disabled:opacity-30 transition-colors duration-base shrink-0"
+                    aria-label="Send message"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

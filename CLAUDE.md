@@ -82,6 +82,24 @@
 - Color contrast minimum 4.5:1 normal text, 3:1 large text
 - Modal traps focus, restores on close; Esc closes modals and dropdowns
 
+## Viewport Discipline (CRITICAL — violations are P0 bugs)
+
+- **HORIZONTAL SCROLL IS BANNED.** No element may ever cause horizontal overflow on any page.
+- `overflow-x: hidden` + `overscroll-behavior-x: none` are set on `html` and `body` globally. Do NOT override.
+- Every element uses `box-sizing: border-box` (enforced globally via `*`).
+- **NEVER use fixed pixel widths on any container/wrapper/section/page.** Use `w-full`, `max-w-*`, or percentage widths.
+- Tables: always wrap in `<div className="w-full overflow-x-auto">`. The table scrolls inside; the page never scrolls horizontally.
+- All images and media: `max-w-full h-auto`. Never a fixed pixel width without a `max-w-full` override.
+- Code/pre blocks: `overflow-x-auto` on the `<pre>` tag, `max-w-full` on wrapper.
+- No negative margins that push content past the viewport edge.
+- Absolute/fixed elements: constrain with `left-0 right-0` or `max-w-full`. Never partially off-screen.
+- Flex children that can grow: always add `min-w-0` to prevent flex blowout.
+- Grid layouts: use `minmax(0, 1fr)` not bare `1fr` to prevent grid blowout.
+- Long strings (URLs, IDs, emails, file paths, user-generated content): use `truncate` or `break-words`.
+- AppShell pattern: `<div className="flex h-dvh overflow-hidden">` outer + `<main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">` inner.
+- Chat panels / right-side sheets: `fixed top-0 right-0 bottom-0 w-full sm:w-[480px] max-w-full` with Framer Motion spring.
+- Test EVERY screen at 320px (iPhone SE). Horizontal scroll = rejected.
+
 ## Forbidden
 
 - Custom hex codes outside the token system
@@ -94,6 +112,11 @@
 - `useEffect` for server data fetching
 - Three or more accent colors
 - Font weights other than 400, 500, 600
+- Horizontal scrolling on any page (only inside explicit `overflow-x-auto` wrappers)
+- Fixed pixel widths on containers (`w-[600px]`, `width: 800px`, etc.)
+- Images/media without `max-w-full`
+- Flex/grid layouts without overflow protection (`min-w-0`, `minmax(0,1fr)`)
+- Uncontrolled long strings without `break-words` or `truncate`
 
 ## Stack Reference
 
