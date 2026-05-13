@@ -194,37 +194,39 @@ export const processDocument = internalAction({
     });
 
     try {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
+      const apiKey = process.env.GOOGLE_AI_API_KEY;
+      if (!apiKey) throw new Error("GOOGLE_AI_API_KEY not configured");
 
       const fileUrl = await ctx.storage.getUrl(doc.storageId);
       if (!fileUrl) throw new Error("Could not get file URL");
 
-      const classifyRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 256,
-          messages: [{
-            role: "user",
-            content: `Classify this document. Filename: "${doc.fileName}".
+      const geminiUrl = (model: string) =>
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+      const geminiPost = (prompt: string, maxTokens: number) =>
+        fetch(geminiUrl("gemini-2.0-flash"), {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: maxTokens, temperature: 0.1 },
+          }),
+        });
+
+      const classifyRes = await geminiPost(
+        `Classify this document. Filename: "${doc.fileName}".
 
 Return ONLY a JSON object: {"category": "<one of: water_bill, power_bill, gas_invoice, sewage_invoice, solid_waste_invoice, garbage_invoice, agm_minutes, resident_application, other>", "confidence": <0.0-1.0>}
 
 Do not include anything else.`,
-          }],
-        }),
-      });
+        256
+      );
 
       const classifyData = await classifyRes.json();
-      const classifyText = classifyData.content?.[0]?.text ?? "{}";
+      const classifyRaw: string = classifyData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const classifyText = classifyRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       let classifyResult: { category: string; confidence: number } = { category: "other", confidence: 0.5 };
-      try { classifyResult = JSON.parse(classifyText.trim()); } catch {}
+      try { classifyResult = JSON.parse(classifyText); } catch {}
 
       const category = classifyResult.category as (typeof doc.docCategory) ?? "other";
       const EXTRACTION_SCHEMAS: Record<string, string> = {
@@ -241,19 +243,8 @@ Do not include anything else.`,
 
       const schema = EXTRACTION_SCHEMAS[category] ?? EXTRACTION_SCHEMAS.other;
 
-      const extractRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1024,
-          messages: [{
-            role: "user",
-            content: `Extract data from this ${category.replace(/_/g, " ")} document.
+      const extractRes = await geminiPost(
+        `Extract data from this ${category.replace(/_/g, " ")} document.
 Filename: "${doc.fileName}"
 Document category: ${category}
 
@@ -261,12 +252,12 @@ Extract these fields: ${schema}
 
 Return ONLY a JSON object with the extracted fields and a "confidence" field (0.0-1.0).
 Use null for fields not found. All monetary values in INR as numbers.`,
-          }],
-        }),
-      });
+        1024
+      );
 
       const extractData = await extractRes.json();
-      const extractText = extractData.content?.[0]?.text ?? "{}";
+      const extractRaw: string = extractData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const extractText = extractRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       let extracted: Record<string, unknown> = { raw: extractText };
       let confidence = 0.7;
 
