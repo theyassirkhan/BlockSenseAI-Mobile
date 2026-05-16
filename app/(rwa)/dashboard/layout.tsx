@@ -8,11 +8,17 @@ import { RwaSidebar } from "@/components/rwa/sidebar";
 import { RwaHeader } from "@/components/rwa/header";
 import { AnimatedPage } from "@/components/ui/animated-page";
 import { AmbientBg } from "@/components/ui/ambient-bg";
+import { AiChat } from "@/components/ui/ai-chat";
+import type { Id } from "@/convex/_generated/dataModel";
 
 export default function RwaDashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const profile = useQuery(api.users.getMyProfile);
+  const society = useQuery(
+    api.societies.get,
+    profile?.societyId ? { societyId: profile.societyId as Id<"societies"> } : "skip"
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -36,6 +42,15 @@ export default function RwaDashboardLayout({ children }: { children: React.React
           <AnimatedPage>{children}</AnimatedPage>
         </main>
       </div>
+      {profile?.societyId && profile?.defaultBlockId && (
+        <AiChat
+          societyId={profile.societyId}
+          blockId={profile.defaultBlockId}
+          residentName={profile.name ?? "Manager"}
+          flatNumber=""
+          societyName={society?.name ?? "Society"}
+        />
+      )}
     </div>
   );
 }

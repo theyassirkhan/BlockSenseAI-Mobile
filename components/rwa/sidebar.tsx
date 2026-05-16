@@ -19,14 +19,14 @@ const NAV = [
   { href: "/dashboard/service-requests", label: "Requests", icon: ClipboardList },
   { href: "/dashboard/tickets", label: "Tickets", icon: TicketCheck },
   { href: "/dashboard/broadcasts", label: "Broadcasts", icon: Megaphone },
-  { href: "/dashboard/complaints", label: "Complaints", icon: MessageSquareWarning, color: "#F97316" },
+  { href: "/dashboard/complaints", label: "Complaints", icon: MessageSquareWarning, iconClass: "text-orange-400" },
   { href: "/dashboard/alerts", label: "Alerts", icon: BellRing },
-  { href: "/dashboard/water", label: "Water", icon: Droplets, color: "#185FA5" },
-  { href: "/dashboard/power", label: "Power", icon: Zap, color: "#854F0B" },
-  { href: "/dashboard/gas", label: "Gas", icon: Flame, color: "#0F6E56" },
-  { href: "/dashboard/sewage", label: "Sewage", icon: Wind, color: "#993C1D" },
-  { href: "/dashboard/waste", label: "Waste", icon: Trash2, color: "#993556" },
-  { href: "/dashboard/garbage", label: "Garbage", icon: Truck, color: "#3B6D11" },
+  { href: "/dashboard/water", label: "Water", icon: Droplets, iconClass: "text-blue-400" },
+  { href: "/dashboard/power", label: "Power", icon: Zap, iconClass: "text-amber-400" },
+  { href: "/dashboard/gas", label: "Gas", icon: Flame, iconClass: "text-orange-400" },
+  { href: "/dashboard/sewage", label: "Sewage", icon: Wind, iconClass: "text-slate-400" },
+  { href: "/dashboard/waste", label: "Waste", icon: Trash2, iconClass: "text-teal-400" },
+  { href: "/dashboard/garbage", label: "Garbage", icon: Truck, iconClass: "text-purple-400" },
   { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -53,17 +53,18 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
 
       <aside
         className={cn(
-          "h-dvh flex flex-col sidebar-glass border-r transition-all duration-300 shrink-0",
+          "h-dvh flex flex-col sidebar-glass border-r border-white/[0.07] transition-all duration-300 shrink-0",
           "fixed inset-y-0 left-0 z-40 w-64",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:translate-x-0",
           collapsed ? "md:w-14" : "md:w-52"
         )}
-        style={{ borderColor: "rgba(255,255,255,0.07)" }}
       >
         <div
-          className={cn("flex items-center gap-2.5 px-4 py-4 border-b", collapsed && "md:justify-center md:px-2")}
-          style={{ borderColor: "rgba(255,255,255,0.07)" }}
+          className={cn(
+            "flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.07]",
+            collapsed && "md:justify-center md:px-2"
+          )}
         >
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <span className="text-white text-xs font-bold">BS</span>
@@ -79,7 +80,7 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-          {NAV.map(({ href, label, icon: Icon, color }) => {
+          {NAV.map(({ href, label, icon: Icon, iconClass }) => {
             const isActive = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
             return (
               <Link
@@ -93,14 +94,14 @@ export function RwaSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: S
                 )}
                 title={collapsed ? label : undefined}
               >
-                <Icon className="h-4 w-4 shrink-0" style={isActive ? undefined : color ? { color } : undefined} />
+                <Icon className={cn("h-4 w-4 shrink-0", !isActive && iconClass)} />
                 <span className={cn(collapsed && "md:hidden")}>{label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-2 border-t hidden md:block" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+        <div className="p-2 border-t border-white/[0.07] hidden md:block">
           <button
             onClick={onToggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}

@@ -3,69 +3,128 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useActiveBlock } from "@/hooks/use-active-block";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GlassStatCard } from "@/components/ui/glass-stat-card";
-import { PageHeader } from "@/components/ui/page-header";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { formatDateTime, levelColor, daysFromNow } from "@/lib/utils";
+import { PdfReportButton } from "@/components/ui/pdf-report";
+import { formatDateTime } from "@/lib/utils";
 import {
   Droplets, Zap, AlertTriangle, CheckCircle2, Flame, Wind,
-  Sparkles, Loader2,
+  Trash2, Truck, TrendingUp, TrendingDown, Users2,
+  CreditCard, ClipboardList, Loader2, Sparkles,
 } from "lucide-react";
-import { PdfReportButton } from "@/components/ui/pdf-report";
 import Link from "next/link";
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-function HealthGauge({ score, grade }: { score: number; grade: string }) {
-  const color = score >= 85 ? "#22c55e" : score >= 70 ? "#84cc16" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const label = score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Needs attention";
+const container: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04 } },
+};
+const item: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+};
 
-  return (
-    <motion.div
-      className="flex items-center gap-5 p-5 rounded-2xl"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <div className="relative w-20 h-20 shrink-0">
-        <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
-          <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
-          <motion.circle
-            cx="40" cy="40" r="32"
-            fill="none"
-            stroke={color}
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray="201"
-            initial={{ strokeDashoffset: 201 }}
-            animate={{ strokeDashoffset: 201 - (score / 100) * 201 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-            style={{ filter: `drop-shadow(0 0 6px ${color})` }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xl font-bold leading-none" style={{ color }}>{score}</span>
-          <span className="text-xs font-bold" style={{ color }}>{grade}</span>
-        </div>
+function KpiCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  iconClass,
+  href,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ElementType;
+  iconClass?: string;
+  href?: string;
+}) {
+  const inner = (
+    <div className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] h-full hover:bg-white/[0.05] transition-colors">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-white/40 uppercase tracking-widest">{label}</span>
+        <Icon className={`h-4 w-4 ${iconClass ?? "text-white/30"}`} />
       </div>
-      <div>
-        <p className="font-bold text-white text-lg">{label}</p>
-        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Society Health Score</p>
-        <div className="flex items-center gap-1.5 mt-2">
-          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: color }} />
-          <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Live monitoring</span>
-        </div>
-      </div>
-    </motion.div>
+      <p className="font-mono text-2xl text-white leading-none">{value}</p>
+      {sub && <p className="text-xs text-white/40 truncate">{sub}</p>}
+    </div>
   );
+  return href ? <Link href={href} className="block">{inner}</Link> : inner;
+}
+
+function UtilityTile({
+  href,
+  icon: Icon,
+  iconClass,
+  borderClass,
+  label,
+  value,
+  sub,
+  trend,
+}: {
+  href: string;
+  icon: React.ElementType;
+  iconClass: string;
+  borderClass: string;
+  label: string;
+  value: string;
+  sub?: string;
+  trend?: "up" | "down" | null;
+}) {
+  return (
+    <Link href={href} className="block">
+      <div className={`flex flex-col gap-2 p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] border-l-2 ${borderClass} hover:bg-white/[0.05] transition-colors h-full`}>
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
+          <span className="text-xs text-white/40 uppercase tracking-widest">{label}</span>
+          {trend === "up" && <TrendingUp className="h-3 w-3 text-red-400 ml-auto" />}
+          {trend === "down" && <TrendingDown className="h-3 w-3 text-emerald-400 ml-auto" />}
+        </div>
+        <p className="font-mono text-xl text-white leading-none">{value}</p>
+        {sub && <p className="text-xs text-white/30 truncate">{sub}</p>}
+      </div>
+    </Link>
+  );
+}
+
+function EmptyState({
+  icon: Icon,
+  headline,
+  description,
+  cta,
+  onCta,
+  href,
+}: {
+  icon: React.ElementType;
+  headline: string;
+  description: string;
+  cta?: string;
+  onCta?: () => void;
+  href?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <Icon className="h-8 w-8 text-white/20" />
+      <p className="text-sm font-medium text-white/60">{headline}</p>
+      <p className="text-xs text-white/30">{description}</p>
+      {cta && href && (
+        <Link href={href}>
+          <Button size="sm" variant="outline" className="border-white/10 hover:border-white/20">{cta}</Button>
+        </Link>
+      )}
+      {cta && onCta && (
+        <Button size="sm" variant="outline" className="border-white/10 hover:border-white/20" onClick={onCta}>{cta}</Button>
+      )}
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs text-white/40 uppercase tracking-widest mb-3">{children}</p>;
 }
 
 function DashboardPageInner() {
@@ -97,10 +156,24 @@ function DashboardPageInner() {
   const alerts = useQuery(api.alerts.getActiveAlerts, societyId && blockId ? { societyId, blockId } : "skip");
   const gasLatest = useQuery(api.gas.getLatest, societyId && blockId ? { societyId, blockId } : "skip");
   const sewageLatest = useQuery(api.sewage.getLatest, societyId && blockId ? { societyId, blockId } : "skip");
-  const healthScore = useQuery(api.societies.getHealthScore, societyId && blockId ? { societyId, blockId } : "skip");
+  const garbageSchedule = useQuery(api.garbage.getSchedule, societyId && blockId ? { societyId, blockId } : "skip");
+  const wasteLog = useQuery(api.waste.getRecentLogs, societyId && blockId ? { societyId, blockId } : "skip");
+  const complaints = useQuery(api.complaints.getBySociety, societyId ? { societyId } : "skip");
+  const paymentSummary = useQuery(api.payments.getSummary, societyId ? { societyId } : "skip");
 
-  const isLoading = !profile || !tanks;
+  const todayStart = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+  const shifts = useQuery(api.shifts.getWeek, societyId ? { societyId, weekStart: todayStart } : "skip");
+
+  const isLoading = profile === undefined || tanks === undefined;
   const criticalAlerts = alerts?.filter(a => a.severity === "critical") ?? [];
+  const openComplaints = (complaints ?? []).filter(c => c.status === "open" || c.status === "under_review");
+  const todayShifts = (shifts ?? []).filter(s => s.date >= todayStart && s.date < todayStart + 86400000);
+
+  const hasNoData =
+    tanks?.length === 0 &&
+    (!dgPred || dgPred.length === 0) &&
+    !gasLatest &&
+    !sewageLatest;
 
   async function handleSeedData() {
     setSeeding(true);
@@ -117,46 +190,28 @@ function DashboardPageInner() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-xl" />)}
         </div>
       </div>
     );
   }
 
-  const stats = [
-    {
-      label: "Water", icon: Droplets, color: "#38BDF8",
-      value: tanks && tanks.length > 0 ? `${tanks[0].currentLevelPct}%` : "—",
-      sub: tanks && tanks.length > 0 ? tanks[0].name : "No tanks",
-      href: "/dashboard/water",
-    },
-    {
-      label: "Diesel", icon: Zap, color: "#F59E0B",
-      value: dgPred && dgPred.length > 0 ? `${dgPred[0].levelPct}%` : "—",
-      sub: dgPred && dgPred.length > 0 ? `${dgPred[0].hoursRemaining}h remaining` : "No DG units",
-      href: "/dashboard/power",
-    },
-    {
-      label: "Gas", icon: Flame, color: "#34D399",
-      value: gasLatest ? `${gasLatest.pressurePSI}` : "—",
-      sub: gasLatest ? "PSI" : "No readings",
-      href: "/dashboard/gas",
-    },
-    {
-      label: "Alerts", icon: AlertTriangle, color: criticalAlerts.length > 0 ? "#EF4444" : "#0D9488",
-      value: alerts?.length ?? 0,
-      sub: criticalAlerts.length > 0 ? `${criticalAlerts.length} critical` : "All clear",
-      href: "/dashboard/alerts",
-    },
-  ];
+  const nextGarbage = garbageSchedule?.[0];
+  const lastWaste = wasteLog?.[0];
+  const collectionPct = paymentSummary && (paymentSummary.collectedCount + paymentSummary.overdueCount) > 0
+    ? Math.round((paymentSummary.collectedCount / (paymentSummary.collectedCount + paymentSummary.overdueCount)) * 100)
+    : null;
 
   return (
-    <div className="space-y-6">
+    <motion.div className="space-y-6" variants={container} initial="hidden" animate="show">
       {/* Critical alert banner */}
       {criticalAlerts.length > 0 && (
         <motion.div
@@ -175,155 +230,282 @@ function DashboardPageInner() {
         </motion.div>
       )}
 
-      {/* Health + seed button */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        {healthScore ? (
-          <HealthGauge score={healthScore.score} grade={healthScore.grade} />
-        ) : (
-          <motion.div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.4)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Sparkles className="h-4 w-4" />
-            Society health will appear once data is logged.
-          </motion.div>
-        )}
+      {/* Row 1 — Society header */}
+      <motion.div variants={item} className="flex items-center justify-between flex-wrap gap-3">
+        <div className="min-w-0">
+          <h1 className="text-lg font-medium text-white truncate">{profile?.name ?? "Dashboard"}</h1>
+          <p className="text-xs text-white/40 font-mono mt-0.5">
+            Updated {formatDateTime(Date.now())}
+          </p>
+        </div>
         <div className="flex items-center gap-2 shrink-0">
           {societyId && blockId && (
             <PdfReportButton societyId={societyId} blockId={blockId} societyName={profile?.name ?? "Society"} />
           )}
-          <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="border-white/10 hover:border-teal-500/50 hover:bg-teal-500/10">
-            {seeding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-            Load demo data
-          </Button>
+          {process.env.NODE_ENV === "development" && hasNoData && (
+            <Button size="sm" variant="outline" onClick={handleSeedData} disabled={seeding} className="border-white/10 hover:border-teal-500/50 hover:bg-teal-500/10">
+              {seeding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+              Load demo data
+            </Button>
+          )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map(({ label, icon, color, value, sub, href }, i) => (
-          <Link key={label} href={href}>
-            <GlassStatCard label={label} value={value} sub={sub} icon={icon} color={color} index={i} />
-          </Link>
-        ))}
-      </div>
+      {/* Row 2 — KPI cards */}
+      <motion.div variants={item}>
+        <SectionLabel>Overview</SectionLabel>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <KpiCard
+            label="Collection rate"
+            value={collectionPct !== null ? `${collectionPct}%` : "—"}
+            sub={paymentSummary ? `₹${paymentSummary.totalCollectedThisMonth.toLocaleString()} this month` : "No payment data"}
+            icon={CreditCard}
+            iconClass="text-teal-400"
+            href="/dashboard/payments"
+          />
+          <KpiCard
+            label="Open complaints"
+            value={openComplaints.length}
+            sub={openComplaints.length === 0 ? "All resolved" : `${openComplaints.length} need attention`}
+            icon={ClipboardList}
+            iconClass="text-orange-400"
+            href="/dashboard/complaints"
+          />
+          <KpiCard
+            label="Active alerts"
+            value={alerts?.length ?? 0}
+            sub={criticalAlerts.length > 0 ? `${criticalAlerts.length} critical` : "All clear"}
+            icon={AlertTriangle}
+            iconClass={criticalAlerts.length > 0 ? "text-red-400" : "text-white/30"}
+            href="/dashboard/alerts"
+          />
+          <KpiCard
+            label="Staff on duty"
+            value={todayShifts.length}
+            sub={todayShifts.length === 0 ? "No shifts today" : `${todayShifts.length} scheduled`}
+            icon={Users2}
+            iconClass="text-blue-400"
+            href="/dashboard/staff"
+          />
+        </div>
+      </motion.div>
 
-      {/* Detail cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ScrollReveal delay={0.1}>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Droplets className="h-4 w-4 text-sky-400" />
-                  Water outlook
-                </CardTitle>
-                <Link href="/dashboard/water" className="text-xs text-primary hover:underline">Details →</Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {waterPred ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: "Days until critical", value: waterPred.daysUntilCritical, color: waterPred.daysUntilCritical < 3 ? "#EF4444" : waterPred.daysUntilCritical < 7 ? "#F59E0B" : "#34D399" },
-                      { label: "Avg daily use", value: `${waterPred.avgDailyConsumption} KL`, color: "#0D9488" },
-                    ].map(({ label, value, color }) => (
-                      <div key={label} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.04)" }}>
-                        <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</p>
-                        <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="rounded-xl p-3 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.04)" }}>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Recommended order</p>
-                    <p className="text-xs font-semibold text-white">{daysFromNow(waterPred.recommendedOrderDate)}</p>
-                  </div>
+      {/* Row 3 — Utility tiles */}
+      <motion.div variants={item}>
+        <SectionLabel>Utilities</SectionLabel>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <UtilityTile
+            href="/dashboard/water"
+            icon={Droplets}
+            iconClass="text-blue-400"
+            borderClass="border-l-blue-500/60"
+            label="Water"
+            value={tanks && tanks.length > 0 ? `${tanks[0].currentLevelPct}%` : "—"}
+            sub={tanks && tanks.length > 0 ? tanks[0].name : "No tanks configured"}
+          />
+          <UtilityTile
+            href="/dashboard/power"
+            icon={Zap}
+            iconClass="text-amber-400"
+            borderClass="border-l-amber-500/60"
+            label="Diesel"
+            value={dgPred && dgPred.length > 0 ? `${dgPred[0].levelPct}%` : "—"}
+            sub={dgPred && dgPred.length > 0 ? `${dgPred[0].hoursRemaining}h remaining` : "No DG units"}
+          />
+          <UtilityTile
+            href="/dashboard/gas"
+            icon={Flame}
+            iconClass="text-orange-400"
+            borderClass="border-l-orange-500/60"
+            label="Gas"
+            value={gasLatest ? `${gasLatest.pressurePSI} PSI` : "—"}
+            sub={gasLatest ? `${gasLatest.meterReading} SCM meter` : "No readings"}
+          />
+          <UtilityTile
+            href="/dashboard/sewage"
+            icon={Wind}
+            iconClass="text-slate-400"
+            borderClass="border-l-slate-500/60"
+            label="Sewage STP"
+            value={sewageLatest ? sewageLatest.stpStatus : "—"}
+            sub={sewageLatest ? `Sludge ${sewageLatest.sludgeTankPct}%` : "No readings"}
+          />
+          <UtilityTile
+            href="/dashboard/waste"
+            icon={Trash2}
+            iconClass="text-teal-400"
+            borderClass="border-l-teal-500/60"
+            label="Waste"
+            value={lastWaste ? `${lastWaste.totalKG} KG` : "—"}
+            sub={lastWaste ? formatDateTime(lastWaste.loggedAt) : "No logs"}
+          />
+          <UtilityTile
+            href="/dashboard/garbage"
+            icon={Truck}
+            iconClass="text-purple-400"
+            borderClass="border-l-purple-500/60"
+            label="Garbage"
+            value={nextGarbage ? "Scheduled" : "—"}
+            sub={nextGarbage ? formatDateTime(nextGarbage.scheduledAt) : "No pickups scheduled"}
+          />
+        </div>
+      </motion.div>
+
+      {/* Row 4 — Water outlook + Active alerts */}
+      <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Water outlook */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Droplets className="h-4 w-4 text-blue-400" />
+              <span className="text-sm font-medium text-white">Water outlook</span>
+            </div>
+            <Link href="/dashboard/water" className="text-xs text-teal-400 hover:text-teal-300 transition-colors">Details →</Link>
+          </div>
+          {waterPred ? (
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {
+                  label: "Days until critical",
+                  value: String(waterPred.daysUntilCritical),
+                  valueClass: waterPred.daysUntilCritical < 3 ? "text-red-400" : waterPred.daysUntilCritical < 7 ? "text-amber-400" : "text-emerald-400",
+                },
+                {
+                  label: "Avg daily use",
+                  value: `${waterPred.avgDailyConsumption} KL`,
+                  valueClass: "text-white",
+                },
+              ].map(({ label, value, valueClass }) => (
+                <div key={label} className="rounded-lg p-3 bg-white/[0.03]">
+                  <p className="text-xs text-white/40 mb-1">{label}</p>
+                  <p className={`font-mono text-2xl ${valueClass}`}>{value}</p>
                 </div>
-              ) : (
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Add water readings to see predictions.</p>
-              )}
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.15}>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                  Active alerts
-                  {alerts && alerts.length > 0 && (
-                    <Badge variant={criticalAlerts.length > 0 ? "critical" : "warning"} className="ml-1">{alerts.length}</Badge>
-                  )}
-                </CardTitle>
-                <Link href="/dashboard/alerts" className="text-xs text-primary hover:underline">View all →</Link>
+              ))}
+              <div className="col-span-2 rounded-lg p-3 bg-white/[0.03] flex items-center justify-between">
+                <p className="text-xs text-white/40">Recommended order date</p>
+                <p className="text-xs font-medium text-white font-mono">{new Date(waterPred.recommendedOrderDate).toLocaleDateString()}</p>
               </div>
-            </CardHeader>
-            <CardContent>
-              {!alerts || alerts.length === 0 ? (
-                <div className="flex items-center gap-2 text-sm py-2" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  All clear — no active alerts
-                </div>
-              ) : (
-                <ul className="space-y-2">
-                  {alerts.slice(0, 4).map((alert, i) => (
-                    <motion.li
-                      key={alert._id}
-                      className="flex items-start gap-3 p-2 rounded-lg transition-colors hover:bg-white/5"
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.06 }}
-                    >
-                      <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-400" : alert.severity === "warning" ? "bg-yellow-400" : "bg-blue-400"}`} />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{alert.title}</p>
-                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{formatDateTime(alert.triggeredAt)}</p>
-                      </div>
-                    </motion.li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      </div>
+            </div>
+          ) : (
+            <EmptyState
+              icon={Droplets}
+              headline="No water data yet"
+              description="Add your first reading to see consumption predictions"
+              cta="Add reading"
+              href="/dashboard/water"
+            />
+          )}
+        </div>
 
-      {/* Health score breakdown */}
-      {healthScore && (
-        <ScrollReveal delay={0.2}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Health score breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-6">
-                {[
-                  { label: "Water level", value: healthScore.breakdown.water, max: 40, color: "#38BDF8" },
-                  { label: "No critical alerts", value: healthScore.breakdown.alerts, max: 30, color: "#0D9488" },
-                  { label: "Waste segregation", value: healthScore.breakdown.waste, max: 30, color: "#34D399" },
-                ].map(({ label, value, max, color }, i) => (
-                  <motion.div key={label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                    <div className="flex justify-between text-xs mb-2">
-                      <span style={{ color: "rgba(255,255,255,0.5)" }}>{label}</span>
-                      <span className="font-semibold text-white">{value}/{max}</span>
-                    </div>
-                    <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{ background: color, boxShadow: `0 0 8px ${color}60` }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(value / max) * 100}%` }}
-                        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 + i * 0.1 }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </ScrollReveal>
-      )}
-    </div>
+        {/* Active alerts */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <span className="text-sm font-medium text-white">Active alerts</span>
+              {alerts && alerts.length > 0 && (
+                <Badge variant={criticalAlerts.length > 0 ? "critical" : "warning"} className="ml-1">{alerts.length}</Badge>
+              )}
+            </div>
+            <Link href="/dashboard/alerts" className="text-xs text-teal-400 hover:text-teal-300 transition-colors">View all →</Link>
+          </div>
+          {!alerts || alerts.length === 0 ? (
+            <div className="flex items-center gap-2 py-3 text-sm text-white/50">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+              All clear — no active alerts
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {alerts.slice(0, 4).map((alert, i) => (
+                <motion.li
+                  key={alert._id}
+                  className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/[0.03] transition-colors"
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-400" : alert.severity === "warning" ? "bg-amber-400" : "bg-blue-400"}`} />
+                  <div className="min-w-0">
+                    <p className="text-sm text-white truncate">{alert.title}</p>
+                    <p className="text-xs text-white/40 font-mono">{formatDateTime(alert.triggeredAt)}</p>
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Row 5 — Recent complaints + Staff on duty */}
+      <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Recent complaints */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-orange-400" />
+              <span className="text-sm font-medium text-white">Recent complaints</span>
+            </div>
+            <Link href="/dashboard/complaints" className="text-xs text-teal-400 hover:text-teal-300 transition-colors">View all →</Link>
+          </div>
+          {!complaints || complaints.length === 0 ? (
+            <div className="flex items-center gap-2 py-3 text-sm text-white/50">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+              No complaints on record
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {complaints.slice(0, 3).map((c) => (
+                <li key={c._id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+                  <p className="text-sm text-white truncate flex-1">{c.subject}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 font-medium ${
+                    c.status === "open" ? "bg-red-400/15 text-red-400" :
+                    c.status === "under_review" ? "bg-amber-400/15 text-amber-400" :
+                    "bg-emerald-400/15 text-emerald-400"
+                  }`}>
+                    {c.status.replace("_", " ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Staff on duty */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Users2 className="h-4 w-4 text-blue-400" />
+              <span className="text-sm font-medium text-white">Staff on duty today</span>
+            </div>
+            <Link href="/dashboard/staff" className="text-xs text-teal-400 hover:text-teal-300 transition-colors">View all →</Link>
+          </div>
+          {todayShifts.length === 0 ? (
+            <div className="flex items-center gap-2 py-3 text-sm text-white/50">
+              <Users2 className="h-4 w-4 text-white/20 shrink-0" />
+              No shifts scheduled today
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {todayShifts.slice(0, 4).map((s) => (
+                <li key={s._id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+                  <div className="min-w-0">
+                    <p className="text-sm text-white font-mono truncate">{s.startTime} – {s.endTime}</p>
+                    <p className="text-xs text-white/40">{s.shiftType}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 font-medium ${
+                    s.status === "present" ? "bg-emerald-400/15 text-emerald-400" :
+                    s.status === "absent" ? "bg-red-400/15 text-red-400" :
+                    "bg-white/10 text-white/50"
+                  }`}>
+                    {s.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
